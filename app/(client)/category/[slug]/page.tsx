@@ -3,6 +3,7 @@ import { getCategories } from "@/sanity/queries";
 import Container from "@/components/Container";
 import { Title } from "@/components/ui/text";
 import CategoryProducts from "@/components/CategoryProducts";
+import { Category } from "@/sanity.types";
 
 const CategoryPage = async ({
   params,
@@ -18,7 +19,7 @@ const CategoryPage = async ({
           Danh mục sản phẩm:{" "}
           <span className="font-bold text-green-600 capitalize tracking-wide">
             {
-              categories?.find((item: any) => item?.slug?.current === slug)
+              categories?.find((item: Category) => item?.slug?.current === slug)
                 ?.title
             }
           </span>

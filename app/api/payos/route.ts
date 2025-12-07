@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createCheckoutSession } from "@/actions/createCheckoutSession";
-import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: Request) {
   try {
@@ -22,11 +21,10 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(session);
-  } catch (error: any) {
+  } catch (error) {
     console.error("PayOS create payment error:", error);
-    return NextResponse.json(
-      { error: error?.message || "Không thể tạo link thanh toán." },
-      { status: 400 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : "Không thể tạo link thanh toán.";
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
   }
 }

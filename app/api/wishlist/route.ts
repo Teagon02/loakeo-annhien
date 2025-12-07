@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { serverWriteClient } from "@/sanity/lib/server-client";
+import { Product } from "@/sanity.types";
 
 // GET: Lấy wishlist của user
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const { userId } = await auth();
 
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
 
     // Lọc bỏ các products null (product đã bị xóa)
     const validProducts = (wishlist.products || []).filter(
-      (product: any) => product && product._id
+      (product: Product | null) => product && product._id
     );
 
     return NextResponse.json({
@@ -93,8 +94,8 @@ export async function POST(request: NextRequest) {
 
     // Chuẩn bị products với reference (lọc bỏ products không hợp lệ)
     const productReferences = products
-      .filter((product: any) => product?._id)
-      .map((product: any) => ({
+      .filter((product: Product | null) => product?._id)
+      .map((product: Product) => ({
         _type: "reference",
         _ref: product._id,
       }));

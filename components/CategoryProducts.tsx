@@ -48,7 +48,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
   };
   useEffect(() => {
     fetchProducts(currentSlug);
-  }, [router]);
+  }, [currentSlug]);
   return (
     <div className="py-5 flex flex-col gap-5 md:flex-row items-start">
       <div className="flex flex-col md:min-w-40 border">
@@ -84,7 +84,7 @@ const CategoryProducts = ({ categories, slug }: Props) => {
           <NoProductAvailable
             selectedTab={
               categories?.find(
-                (item: any) => item?.slug?.current === currentSlug
+                (item: Category) => item?.slug?.current === currentSlug
               )?.title
             }
             className="mt-0 w-full "

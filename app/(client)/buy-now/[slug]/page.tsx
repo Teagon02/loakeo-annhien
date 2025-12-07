@@ -1,8 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { client } from "@/sanity/lib/client";
-import { PRODUCT_BY_SLUG_QUERY } from "@/sanity/queries/query";
 import { Product } from "@/sanity.types";
 import Container from "@/components/Container";
 import Image from "next/image";
@@ -21,7 +20,6 @@ import Link from "next/link";
 
 const BuyNowPage = () => {
   const params = useParams();
-  const router = useRouter();
   const slug = params?.slug as string;
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -116,10 +114,10 @@ const BuyNowPage = () => {
         }),
       });
 
-      let data: any = null;
+      let data: { checkoutUrl?: string; error?: string } | null = null;
       try {
         data = await response.json();
-      } catch (err) {
+      } catch {
         throw new Error(
           "Không thể tạo link thanh toán (phản hồi không hợp lệ)."
         );
@@ -137,9 +135,13 @@ const BuyNowPage = () => {
       }
 
       window.location.href = data.checkoutUrl;
-    } catch (error: any) {
+    } catch (error) {
       console.error("PayOS checkout error:", error);
-      toast.error(error?.message || "Không thể khởi tạo thanh toán.");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Không thể khởi tạo thanh toán.";
+      toast.error(errorMessage);
     } finally {
       setCheckoutLoading(false);
     }
