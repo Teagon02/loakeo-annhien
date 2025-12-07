@@ -16,10 +16,7 @@ const nextConfig: NextConfig = {
     "@sanity/vision",
     "@sanity/image-url",
   ],
-  serverComponentsExternalPackages: [
-    "sanity",
-    "@sanity/vision",
-  ],
+  serverComponentsExternalPackages: ["sanity", "@sanity/vision"],
   webpack: (config, { isServer }) => {
     // Fix for Sanity modules bundling issue
     if (!isServer) {
@@ -30,7 +27,7 @@ const nextConfig: NextConfig = {
         tls: false,
       };
     }
-    
+
     // Handle Sanity ESM modules
     config.module = {
       ...config.module,
@@ -45,10 +42,10 @@ const nextConfig: NextConfig = {
 
     return config;
   },
-  experimental: {
-    // Disable Turbopack for production builds
-    turbo: false,
-  },
+  // experimental: {
+  //   // Disable Turbopack for production builds
+  //   turbo: false,
+  // },
 };
 
 export default nextConfig;
