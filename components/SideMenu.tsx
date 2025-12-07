@@ -1,6 +1,5 @@
 import React, { FC } from "react";
 import Logo from "./Logo";
-import HeaderMenu from "./HeaderMenu";
 import { X } from "lucide-react";
 import { headerData } from "@/constants/data";
 import Link from "next/link";

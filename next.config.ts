@@ -21,10 +21,8 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
-  // Experimental options for better Sanity support
-  experimental: {
-    serverComponentsExternalPackages: ["sanity"],
-  },
+  // External packages for server components
+  serverExternalPackages: ["sanity"],
 };
 
 export default nextConfig;

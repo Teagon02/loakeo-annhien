@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import useStore from "@/store";
 import Container from "./Container";
-import NoProductAvailable from "./NoProductAvailable";
 import { Heart, X } from "lucide-react";
 import { Button } from "./ui/button";
 import Link from "next/link";
@@ -97,11 +96,20 @@ const WishListProducts = () => {
                                   return category;
                                 }
                                 // Nếu là object, lấy title hoặc name
-                                return (
-                                  (category as any)?.title ||
-                                  (category as any)?.name ||
-                                  String(category)
-                                );
+                                const categoryObj = category as
+                                  | { title?: string; name?: string }
+                                  | string;
+                                if (
+                                  typeof categoryObj === "object" &&
+                                  categoryObj !== null
+                                ) {
+                                  return (
+                                    categoryObj.title ||
+                                    categoryObj.name ||
+                                    String(category)
+                                  );
+                                }
+                                return String(category);
                               })
                               .filter(Boolean)
                               .join(", ")}

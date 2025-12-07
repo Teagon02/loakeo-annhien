@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import HomeTabBar from "./HomeTabBar";
 import { productType } from "@/constants/data";
 import { client } from "@/sanity/lib/client";
@@ -24,9 +24,12 @@ const ProductGrid = () => {
     (item) => item.title === selectedTab
   )?.value;
 
-  const params = {
-    variant: currentTabValue,
-  };
+  const params = useMemo(
+    () => ({
+      variant: currentTabValue,
+    }),
+    [currentTabValue]
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -45,7 +48,7 @@ const ProductGrid = () => {
       }
     };
     fetchData();
-  }, [selectedTab]);
+  }, [selectedTab, query, params]);
   return (
     <div>
       <HomeTabBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
