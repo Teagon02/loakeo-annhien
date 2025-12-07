@@ -6,7 +6,12 @@ import { urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
 import { Calendar } from "lucide-react";
 import dayjs from "dayjs";
-import { Blog, Blogcategory } from "@/sanity.types";
+import { Blog } from "@/sanity.types";
+
+// Type for blog with populated categories from query
+type BlogWithPopulatedCategories = Omit<Blog, "blogcategories"> & {
+  blogcategories?: Array<{ title: string | null }> | null;
+};
 
 const LatestBlog = async () => {
   const blogs = await getLatestBlogs(4);
@@ -14,12 +19,7 @@ const LatestBlog = async () => {
     <div className="mb-10 lg:mb-20">
       <Title>Bài viết mới nhất</Title>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mt-5">
-        {blogs?.map(
-          (
-            blog: Blog & {
-              blogcategories?: Array<Blogcategory | { title?: string }>;
-            }
-          ) => (
+        {blogs?.map((blog: BlogWithPopulatedCategories) => (
             // hiển thị khối blog
             <div
               key={blog?._id}
@@ -43,10 +43,7 @@ const LatestBlog = async () => {
                   {/* hiển thị danh mục bài viết */}
                   <div className="flex items-center relative group cursor-pointer">
                     {blog?.blogcategories?.map(
-                      (
-                        item: Blogcategory | { title?: string },
-                        index: number
-                      ) => (
+                      (item: { title: string | null }, index: number) => (
                         <p
                           key={index}
                           className="font-semibold text-shop_dark_green tracking-wider"
