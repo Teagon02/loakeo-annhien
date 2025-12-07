@@ -50,7 +50,6 @@ const CartPage = () => {
     resetCart,
     getGroupedItems,
   } = useStore();
-  const [isClient, setIsClient] = useState(false);
   const [loading, setLoading] = useState(false);
   const groupedItems = useStore((state) => state.getGroupedItems());
   const { isSignedIn } = useAuth();

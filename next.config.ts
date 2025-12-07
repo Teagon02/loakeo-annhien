@@ -10,6 +10,21 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Configure webpack to handle Sanity better
+  webpack: (config, { isServer }) => {
+    // Exclude Sanity from server-side bundle if needed
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      };
+    }
+    return config;
+  },
+  // Experimental options for better Sanity support
+  experimental: {
+    serverComponentsExternalPackages: ["sanity"],
+  },
 };
 
 export default nextConfig;
