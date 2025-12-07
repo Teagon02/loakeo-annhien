@@ -32,7 +32,7 @@ const GuestAddressForm = ({
     province: initialAddress?.province || "",
     district: initialAddress?.district || "",
     ward: initialAddress?.ward || "",
-    addressLine: initialAddress?.addressLine || initialAddress?.address || "",
+    addressLine: initialAddress?.addressLine || "",
   });
 
   const handleInputChange = (
