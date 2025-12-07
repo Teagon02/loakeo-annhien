@@ -1,9 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
 import { serverWriteClient } from "@/sanity/lib/server-client";
+import { Product } from "@/sanity.types";
+import { CartItem } from "@/store";
+
+// Type for cart item with dereferenced product from query
+type CartItemWithProduct = {
+  product: (Product & { categories?: string[] }) | null;
+  quantity: number;
+};
 
 // GET: Lấy giỏ hàng của user
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const { userId } = await auth();
 
@@ -37,7 +45,7 @@ export async function GET(request: NextRequest) {
 
     // Lọc bỏ các items có product null (product đã bị xóa)
     const validItems = (cart.items || []).filter(
-      (item: any) => item.product && item.product._id
+      (item: CartItemWithProduct) => item.product && item.product._id
     );
 
     return NextResponse.json({
@@ -93,10 +101,10 @@ export async function POST(request: NextRequest) {
 
     // Chuẩn bị items với reference đến product (lọc bỏ items không hợp lệ)
     const cartItems = items
-      .filter((item: any) => item?.product?._id)
-      .map((item: any) => ({
+      .filter((item: CartItem) => item?.product?._id)
+      .map((item: CartItem) => ({
         product: {
-          _type: "reference",
+          _type: "reference" as const,
           _ref: item.product._id,
         },
         quantity: Math.max(1, item.quantity || 1),

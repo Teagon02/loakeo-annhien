@@ -1,6 +1,6 @@
 "use client";
 import useStore from "@/store";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useUser } from "@clerk/nextjs";
 import { Address } from "@/sanity.types";
@@ -48,7 +48,6 @@ const CartPage = () => {
     getItemCount,
     getSubTotalPrice,
     resetCart,
-    getGroupedItems,
   } = useStore();
   const [loading, setLoading] = useState(false);
   const groupedItems = useStore((state) => state.getGroupedItems());
@@ -57,7 +56,7 @@ const CartPage = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   console.log("addresses", addresses);
-  const fetchAddresses = async () => {
+  const fetchAddresses = useCallback(async () => {
     if (!user?.id) return;
 
     setLoading(true);
@@ -78,13 +77,13 @@ const CartPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
 
   useEffect(() => {
     if (isSignedIn && user) {
       fetchAddresses();
     }
-  }, [isSignedIn, user]);
+  }, [isSignedIn, user, fetchAddresses]);
 
   const handleCheckout = async () => {
     if (!groupedItems?.length) {
@@ -112,30 +111,38 @@ const CartPage = () => {
         }),
       });
 
-      let data: any = null;
+      type PayOSResponse =
+        | { checkoutUrl: string; orderCode: number }
+        | { error: string };
+      let data: PayOSResponse | null = null;
       try {
         data = await response.json();
-      } catch (err) {
+      } catch {
         // fallback when server returns HTML error
         throw new Error(
           "Không thể tạo link thanh toán (phản hồi không hợp lệ)."
         );
       }
       if (!response.ok) {
-        throw new Error(
-          data?.error ||
-            `Không thể tạo link thanh toán (mã ${response.status}).`
-        );
+        const errorMessage =
+          data && "error" in data
+            ? data.error
+            : `Không thể tạo link thanh toán (mã ${response.status}).`;
+        throw new Error(errorMessage);
       }
 
-      if (!data?.checkoutUrl) {
+      if (!data || !("checkoutUrl" in data) || !data.checkoutUrl) {
         throw new Error("Không nhận được link thanh toán từ PayOS.");
       }
 
       window.location.href = data.checkoutUrl;
-    } catch (error: any) {
+    } catch (error) {
       console.error("PayOS checkout error:", error);
-      toast.error(error?.message || "Không thể khởi tạo thanh toán.");
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Không thể khởi tạo thanh toán.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

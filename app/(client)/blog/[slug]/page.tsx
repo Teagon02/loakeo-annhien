@@ -8,16 +8,24 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import dayjs from "dayjs";
 import { PortableText } from "@portabletext/react";
-import { BlockContent } from "@/sanity.types";
+import { BlockContent, Blogcategory } from "@/sanity.types";
 import { notFound } from "next/navigation";
 
 // ISR: Revalidate mỗi giờ để giảm API calls nhưng vẫn có data mới
 export const revalidate = 3600;
 
 // Custom components for PortableText
+type ImageValue = Extract<BlockContent[number], { _type: "image" }>;
+
+type LinkValue = {
+  href?: string;
+  _type: "link";
+  _key: string;
+};
+
 const PortableTextComponents = {
   types: {
-    image: ({ value }: any) => {
+    image: ({ value }: { value: ImageValue }) => {
       if (!value?.asset) return null;
       return (
         <div className="my-8">
@@ -38,44 +46,52 @@ const PortableTextComponents = {
     },
   },
   block: {
-    h1: ({ children }: any) => (
+    h1: ({ children }: { children?: React.ReactNode }) => (
       <h1 className="text-4xl font-bold mt-8 mb-4 text-gray-900">{children}</h1>
     ),
-    h2: ({ children }: any) => (
+    h2: ({ children }: { children?: React.ReactNode }) => (
       <h2 className="text-3xl font-bold mt-6 mb-3 text-gray-900">{children}</h2>
     ),
-    h3: ({ children }: any) => (
+    h3: ({ children }: { children?: React.ReactNode }) => (
       <h3 className="text-2xl font-semibold mt-5 mb-2 text-gray-900">
         {children}
       </h3>
     ),
-    h4: ({ children }: any) => (
+    h4: ({ children }: { children?: React.ReactNode }) => (
       <h4 className="text-xl font-semibold mt-4 mb-2 text-gray-900">
         {children}
       </h4>
     ),
-    blockquote: ({ children }: any) => (
+    blockquote: ({ children }: { children?: React.ReactNode }) => (
       <blockquote className="border-l-4 border-shop_light_green pl-4 py-2 my-4 italic text-gray-700 bg-shop_light_bg rounded-r">
         {children}
       </blockquote>
     ),
-    normal: ({ children }: any) => (
+    normal: ({ children }: { children?: React.ReactNode }) => (
       <p className="mb-4 text-gray-700 leading-relaxed">{children}</p>
     ),
   },
   list: {
-    bullet: ({ children }: any) => (
+    bullet: ({ children }: { children?: React.ReactNode }) => (
       <ul className="list-disc list-inside mb-4 space-y-2 text-gray-700 ml-4">
         {children}
       </ul>
     ),
   },
   marks: {
-    strong: ({ children }: any) => (
+    strong: ({ children }: { children?: React.ReactNode }) => (
       <strong className="font-bold text-gray-900">{children}</strong>
     ),
-    em: ({ children }: any) => <em className="italic">{children}</em>,
-    link: ({ children, value }: any) => {
+    em: ({ children }: { children?: React.ReactNode }) => (
+      <em className="italic">{children}</em>
+    ),
+    link: ({
+      children,
+      value,
+    }: {
+      children?: React.ReactNode;
+      value?: LinkValue;
+    }) => {
       const target = (value?.href || "").startsWith("http")
         ? "_blank"
         : undefined;
@@ -121,15 +137,17 @@ const SingleBlogPage = async ({
           {/* Categories */}
           {blog.blogcategories && blog.blogcategories.length > 0 && (
             <div className="flex flex-wrap items-center gap-2 mb-4">
-              {blog.blogcategories.map((category: any, index: number) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center gap-1 px-3 py-1 bg-shop_light_bg text-shop_dark_green rounded-full text-sm font-medium"
-                >
-                  <Tag className="w-3 h-3" />
-                  {category?.title}
-                </span>
-              ))}
+              {blog.blogcategories.map(
+                (category: { title: string | null }, index: number) => (
+                  <span
+                    key={index}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-shop_light_bg text-shop_dark_green rounded-full text-sm font-medium"
+                  >
+                    <Tag className="w-3 h-3" />
+                    {category?.title}
+                  </span>
+                )
+              )}
             </div>
           )}
 

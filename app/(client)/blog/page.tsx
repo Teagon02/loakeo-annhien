@@ -8,9 +8,15 @@ import Link from "next/link";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import dayjs from "dayjs";
 import { Button } from "@/components/ui/button";
+import { Blog } from "@/sanity.types";
 
 // ISR: Revalidate mỗi 10 phút cho blog listing
 export const revalidate = 600;
+
+// Type for blog with populated categories
+type BlogWithPopulatedCategories = Omit<Blog, "blogcategories"> & {
+  blogcategories?: Array<{ title: string | null }> | null;
+};
 
 interface BlogPageProps {
   searchParams: Promise<{ page?: string }>;
@@ -35,7 +41,7 @@ const BlogPage = async ({ searchParams }: BlogPageProps) => {
 
       {blogs && blogs.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {blogs.map((blog: any) => (
+          {blogs.map((blog: BlogWithPopulatedCategories) => (
             <article
               key={blog._id}
               className="rounded-lg overflow-hidden bg-white border border-gray-200 hover:border-shop_light_green hover:shadow-lg transition-all duration-300 group"
@@ -61,7 +67,7 @@ const BlogPage = async ({ searchParams }: BlogPageProps) => {
                   {blog.blogcategories && blog.blogcategories.length > 0 && (
                     <div className="flex items-center gap-1">
                       {blog.blogcategories.map(
-                        (category: any, index: number) => (
+                        (category: { title: string | null }, index: number) => (
                           <span
                             key={index}
                             className="px-2 py-1 bg-shop_light_bg text-shop_dark_green rounded-full font-medium"
