@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Container from "@/components/Container";
 import { Title } from "@/components/ui/text";
 import useStore from "@/store";
 
-const PaymentSuccessPage = () => {
+const PaymentSuccessContent = () => {
   const searchParams = useSearchParams();
   const orderCode = searchParams?.get("orderCode");
   const { resetCart } = useStore();
@@ -42,6 +42,21 @@ const PaymentSuccessPage = () => {
         </Button>
       </div>
     </Container>
+  );
+};
+
+const PaymentSuccessPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <Container className="py-20 flex flex-col gap-4 items-center text-center">
+          <Title className="text-2xl">Thanh toán thành công</Title>
+          <p className="text-gray-600">Đang tải...</p>
+        </Container>
+      }
+    >
+      <PaymentSuccessContent />
+    </Suspense>
   );
 };
 
