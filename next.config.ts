@@ -10,6 +10,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  transpilePackages: [
+    "sanity",
+    "next-sanity",
+    "@sanity/vision",
+    "@sanity/image-url",
+  ],
+  experimental: {
+    // Disable Turbopack for production builds
+    turbo: undefined,
+  },
 };
 
 export default nextConfig;
