@@ -12,8 +12,8 @@ const ContactPage = () => {
     {
       icon: <Mail className="w-6 h-6" />,
       title: "Nhấn vào đây để gửi email đến chúng tôi",
-      content: "contact@loakeoannhien.com",
-      href: "mailto:contact@loakeoannhien.com",
+      content: "loakeoannhien@gmail.com",
+      href: "mailto:loakeoannhien@gmail.com",
     },
     {
       icon: <Phone className="w-6 h-6" />,
