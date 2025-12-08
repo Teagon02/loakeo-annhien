@@ -1,15 +1,34 @@
+"use client";
 import React from "react";
 import { Product } from "@/sanity.types";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
 import Link from "next/link";
-import { Flame, StarIcon } from "lucide-react";
+import { Flame, StarIcon, ShoppingCart } from "lucide-react";
 import AddToWishList from "./AddToWishList";
 import { Title } from "./ui/text";
 import PriceView from "./PriceView";
 import AddToCartButton from "./AddToCartButton";
+import { useAuth } from "@clerk/nextjs";
+import { SignInButton } from "@clerk/nextjs";
+import { Button } from "./ui/button";
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const ProductCard = ({ product }: { product: Product }) => {
+  const { isSignedIn } = useAuth();
+  const router = useRouter();
+  const isOutOfStock = product?.stock === 0;
+
+  const handleBuyNow = () => {
+    if (isOutOfStock) {
+      return;
+    }
+    if (product?.slug?.current) {
+      router.push(`/buy-now/${product.slug.current}`);
+    }
+  };
+
   return (
     <div className="text-sm border border-dark_blue/20 rounded-md bg-white group">
       <div className="relative group overflow-hidden bg-shop_light_bg p-2">
@@ -89,7 +108,32 @@ const ProductCard = ({ product }: { product: Product }) => {
           discount={product?.discount as number}
           className="text-sm"
         />
-        <AddToCartButton product={product} className="w-36 rounded-full" />
+        {/* Hiển thị khác nhau dựa trên trạng thái đăng nhập */}
+        {isSignedIn ? (
+          <AddToCartButton product={product} className="w-36 rounded-full" />
+        ) : (
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleBuyNow}
+              disabled={isOutOfStock}
+              className={cn(
+                "flex-1 bg-shop_btn_dark_green/70 text-shop_light_bg shadow-none border border-shop_dark_green/80 font-semibold tracking-wide hover:text-white hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect rounded-full",
+                isOutOfStock && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              {isOutOfStock ? "Hết hàng" : "Mua ngay"}
+            </Button>
+            <SignInButton mode="modal">
+              <button
+                disabled={isOutOfStock}
+                className="p-3 rounded-full border border-shop_dark_green/80 bg-shop_btn_dark_green/70 text-shop_light_bg hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Thêm vào giỏ hàng"
+              >
+                <ShoppingCart size={15} />
+              </button>
+            </SignInButton>
+          </div>
+        )}
       </div>
     </div>
   );

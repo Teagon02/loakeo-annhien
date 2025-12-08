@@ -179,7 +179,7 @@ const DealBanner = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <span className="block">🎊 CHÀO MỪNG NĂM MỚI 🎊</span>
+              <span className="block">🎊 XUÂN BÍNH NGỌ 2026🎊</span>
               <motion.span
                 className="block mt-2 text-yellow-300 drop-shadow-lg"
                 animate={{
@@ -231,7 +231,6 @@ const DealBanner = () => {
               transition={{ duration: 0.8, delay: 0.6 }}
             >
               {[
-                { icon: Gift, text: "Quà tặng hấp dẫn" },
                 { icon: Percent, text: "Giảm giá sâu" },
                 { icon: Zap, text: "Giao hàng nhanh" },
               ].map((item, idx) => (

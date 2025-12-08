@@ -97,64 +97,6 @@ const SingleProductPage = async ({
             <FavoriteButton showProduct={true} product={product} />
           </div>
 
-          {/* YouTube Review Link */}
-          <div className="border border-lightColor/25 rounded-lg overflow-hidden bg-gradient-to-r from-red-50 to-red-100/50">
-            {product?.linkYoutube ? (
-              <Link
-                href={product.linkYoutube}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-4 p-4 hover:bg-gradient-to-r hover:from-red-100 hover:to-red-200 transition-all duration-200 group"
-              >
-                <div className="relative shrink-0">
-                  <div className="absolute inset-0 bg-red-600 rounded-full animate-ping opacity-20 group-hover:opacity-40" />
-                  <div className="relative bg-red-600 rounded-full p-3 group-hover:bg-red-700 transition-colors">
-                    <PlayCircle className="w-6 h-6 text-white" fill="white" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-base font-semibold text-gray-900 group-hover:text-red-700 transition-colors">
-                    Nhấn vào đây
-                  </p>
-                  <p className="text-sm text-gray-600 mt-0.5">
-                    Xem đánh giá chi tiết sản phẩm này trên YouTube
-                  </p>
-                </div>
-                <div className="shrink-0">
-                  <svg
-                    className="w-5 h-5 text-red-600 group-hover:translate-x-1 transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </div>
-              </Link>
-            ) : (
-              <div className="flex items-center gap-4 p-4 opacity-75">
-                <div className="relative shrink-0">
-                  <div className="relative bg-gray-400 rounded-full p-3">
-                    <PlayCircle className="w-6 h-6 text-white" fill="white" />
-                  </div>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-base font-semibold text-gray-600">
-                    Chưa có video đánh giá
-                  </p>
-                  <p className="text-sm text-gray-500 mt-0.5">
-                    Video đánh giá sản phẩm này sẽ được cập nhật sớm
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
           {/* Giao hàng toàn quốc & Đổi trả miễn phí */}
           <div className="flex flex-col">
             <div className="border border-lightColor/25 border-b-0 p-3 flex items-center gap-2.5">
