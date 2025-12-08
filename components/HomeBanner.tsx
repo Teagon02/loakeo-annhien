@@ -143,33 +143,58 @@ const HomeBanner = () => {
                 delay: 0.3,
                 ease: [0.16, 1, 0.3, 1],
               }}
-              className="space-y-4"
+              className="space-y-5"
             >
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.1] tracking-tight">
+              <div className="relative inline-block">
                 <motion.span
-                  className="block bg-linear-to-r from-shop_dark_green via-shop_light_green to-shop_dark_green bg-clip-text text-transparent bg-size-[200%_auto]"
+                  className="absolute inset-0 blur-3xl bg-linear-to-r from-shop_light_green/40 via-white/40 to-shop_dark_green/30 rounded-3xl"
                   animate={{
-                    backgroundPosition: [
-                      "0% center",
-                      "200% center",
-                      "0% center",
-                    ],
+                    opacity: [0.4, 0.8, 0.4],
+                    scale: [0.98, 1.04, 0.98],
                   }}
                   transition={{
-                    duration: 5,
+                    duration: 4,
                     repeat: Infinity,
-                    ease: "linear",
+                    ease: "easeInOut",
                   }}
-                >
-                  Mua loa kéo
-                </motion.span>
-                <span className="block text-shop_dark_green mt-2">
-                  với giá cực tốt
-                </span>
-                <span className="block text-shop_light_text text-2xl md:text-3xl font-normal mt-4">
-                  Hãy chọn sản phẩm yêu thích của bạn
-                </span>
-              </h1>
+                />
+                <h1 className="relative text-4xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight drop-shadow-lg">
+                  <motion.span
+                    className="block bg-linear-to-r from-shop_dark_green via-shop_light_green to-shop_dark_green bg-clip-text text-transparent bg-size-[220%_auto]"
+                    animate={{
+                      backgroundPosition: [
+                        "0% center",
+                        "200% center",
+                        "0% center",
+                      ],
+                    }}
+                    transition={{
+                      duration: 6,
+                      repeat: Infinity,
+                      ease: "linear",
+                    }}
+                  >
+                    Loa Kéo An Nhiên
+                  </motion.span>
+                  <motion.span
+                    className="mt-3 inline-flex items-center gap-3 text-xl md:text-2xl lg:text-3xl text-shop_dark_green/90"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                  >
+                    <span className="px-3 py-1 rounded-full bg-white/70 border border-shop_dark_green/10 backdrop-blur-md shadow-sm">
+                      Gì cũng có?
+                    </span>
+                    <span className="hidden sm:inline h-px w-10 bg-linear-to-r from-shop_dark_green/50 to-transparent" />
+                    <span className="px-3 py-1 rounded-full bg-white/70 border border-shop_dark_green/10 backdrop-blur-md shadow-sm">
+                      Mại dzô!!!
+                    </span>
+                  </motion.span>
+                </h1>
+              </div>
+              <p className="text-shop_light_text text-lg md:text-xl lg:text-2xl max-w-2xl leading-relaxed">
+                Ráp và độ chế loa kéo theo yêu cầu
+              </p>
             </motion.div>
 
             {/* Sound wave animation */}

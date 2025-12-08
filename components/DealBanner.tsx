@@ -12,7 +12,7 @@ const DealBanner = () => {
     delay = 0,
     x = 0,
     y = 0,
-    color = "#FFD700",
+    color = "#ffffff",
   }: {
     delay?: number;
     x?: number;
@@ -44,8 +44,8 @@ const DealBanner = () => {
     />
   );
 
-  // Floating lanterns
-  const Lantern = ({ delay = 0, x = 0 }: { delay?: number; x?: number }) => (
+  // Floating snowflakes
+  const SnowFlake = ({ delay = 0, x = 0 }: { delay?: number; x?: number }) => (
     <motion.div
       className="absolute text-4xl"
       style={{ left: `${x}%`, top: "10%" }}
@@ -60,18 +60,12 @@ const DealBanner = () => {
         ease: "easeInOut",
       }}
     >
-      🏮
+      ❄️
     </motion.div>
   );
 
-  // Firecracker animation
-  const Firecracker = ({
-    delay = 0,
-    x = 0,
-  }: {
-    delay?: number;
-    x?: number;
-  }) => (
+  // Ornament animation
+  const Ornament = ({ delay = 0, x = 0 }: { delay?: number; x?: number }) => (
     <motion.div
       className="absolute text-3xl"
       style={{ left: `${x}%`, top: "5%" }}
@@ -86,7 +80,7 @@ const DealBanner = () => {
         ease: "easeInOut",
       }}
     >
-      🧨
+      🎁
     </motion.div>
   );
 
@@ -97,13 +91,13 @@ const DealBanner = () => {
         className="absolute inset-0"
         animate={{
           background: [
-            "linear-gradient(135deg, #DC2626 0%, #F59E0B 50%, #DC2626 100%)",
-            "linear-gradient(135deg, #F59E0B 0%, #DC2626 50%, #F59E0B 100%)",
-            "linear-gradient(135deg, #DC2626 0%, #F59E0B 50%, #DC2626 100%)",
+            "linear-gradient(135deg, #0f2f3d 0%, #9c1b2d 50%, #0f2f3d 100%)",
+            "linear-gradient(135deg, #9c1b2d 0%, #0f2f3d 50%, #9c1b2d 100%)",
+            "linear-gradient(135deg, #0f2f3d 0%, #9c1b2d 50%, #0f2f3d 100%)",
           ],
         }}
         transition={{
-          duration: 8,
+          duration: 12,
           repeat: Infinity,
           ease: "linear",
         }}
@@ -134,15 +128,15 @@ const DealBanner = () => {
           delay={i * 0.2}
           x={Math.random() * 100}
           y={-10}
-          color={i % 3 === 0 ? "#FFD700" : i % 3 === 1 ? "#FF6B6B" : "#4ECDC4"}
+          color={i % 3 === 0 ? "#ffffff" : i % 3 === 1 ? "#d5e8ff" : "#9bd5ff"}
         />
       ))}
 
       {/* Floating decorations */}
-      <Lantern delay={0} x={5} />
-      <Lantern delay={1} x={90} />
-      <Firecracker delay={0.5} x={15} />
-      <Firecracker delay={1.5} x={85} />
+      <SnowFlake delay={0} x={5} />
+      <SnowFlake delay={1} x={90} />
+      <Ornament delay={0.5} x={15} />
+      <Ornament delay={1.5} x={85} />
 
       {/* Content */}
       <div className="relative z-10 px-6 py-8 md:px-12 md:py-16 lg:px-16 lg:py-20">
@@ -159,16 +153,16 @@ const DealBanner = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full border border-white/30 shadow-lg mb-4"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-md rounded-full border border-white/30 shadow-lg mb-4"
             >
               <motion.div
                 animate={{ rotate: [0, 360] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               >
-                <Sparkles className="w-4 h-4 text-yellow-300" />
+                <Sparkles className="w-4 h-4 text-amber-200" />
               </motion.div>
               <span className="text-sm font-bold text-white">
-                🎉 KHUYẾN MÃI TẾT 2026 🎉
+                🎄 Noel • Loa Kéo An Nhiên 🎁
               </span>
             </motion.div>
 
@@ -179,9 +173,11 @@ const DealBanner = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
             >
-              <span className="block">🎊 XUÂN BÍNH NGỌ 2026🎊</span>
+              <span className="block text-white/80">
+                Không khí Giáng Sinh rộn ràng
+              </span>
               <motion.span
-                className="block mt-2 text-yellow-300 drop-shadow-lg"
+                className="block mt-2 text-amber-100 drop-shadow-lg"
                 animate={{
                   scale: [1, 1.05, 1],
                 }}
@@ -191,16 +187,16 @@ const DealBanner = () => {
                   ease: "easeInOut",
                 }}
               >
-                GIẢM GIÁ LÊN ĐẾN
+                Loa Kéo An Nhiên
               </motion.span>
               <motion.span
-                className="block mt-2 text-6xl md:text-7xl lg:text-8xl font-black text-yellow-300 drop-shadow-2xl"
+                className="block mt-2 text-5xl md:text-6xl lg:text-7xl font-black text-amber-50 drop-shadow-2xl"
                 animate={{
-                  scale: [1, 1.1, 1],
+                  scale: [1, 1.08, 1],
                   textShadow: [
-                    "0 0 20px rgba(255, 215, 0, 0.5)",
-                    "0 0 40px rgba(255, 215, 0, 0.8)",
-                    "0 0 20px rgba(255, 215, 0, 0.5)",
+                    "0 0 18px rgba(255,255,255,0.25)",
+                    "0 0 28px rgba(156,27,45,0.55)",
+                    "0 0 18px rgba(255,255,255,0.25)",
                   ],
                 }}
                 transition={{
@@ -209,7 +205,7 @@ const DealBanner = () => {
                   ease: "easeInOut",
                 }}
               >
-                50%
+                Sale Noel đến 50%
               </motion.span>
             </motion.h2>
 
@@ -220,7 +216,7 @@ const DealBanner = () => {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.5 }}
             >
-              🎁 Mua sắm ngay để nhận ưu đãi đặc biệt! 🎁
+              Mừng giáng sinh với ưu đãi đặc biệt tết tết.
             </motion.p>
 
             {/* Features */}
@@ -231,6 +227,7 @@ const DealBanner = () => {
               transition={{ duration: 0.8, delay: 0.6 }}
             >
               {[
+                { icon: Gift, text: "Mừng giáng sinh" },
                 { icon: Percent, text: "Giảm giá sâu" },
                 { icon: Zap, text: "Giao hàng nhanh" },
               ].map((item, idx) => (
@@ -242,20 +239,13 @@ const DealBanner = () => {
                   transition={{ duration: 0.5, delay: 0.7 + idx * 0.1 }}
                   whileHover={{ scale: 1.05 }}
                 >
-                  <item.icon className="w-4 h-4 text-yellow-300" />
+                  <item.icon className="w-4 h-4 text-amber-200" />
                   <span className="text-sm font-semibold text-white">
                     {item.text}
                   </span>
                 </motion.div>
               ))}
             </motion.div>
-
-            {/* CTA Button */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-            ></motion.div>
           </motion.div>
 
           {/* Right decorative elements */}
@@ -267,7 +257,7 @@ const DealBanner = () => {
           >
             {/* Large decorative text */}
             <motion.div
-              className="text-8xl md:text-9xl font-black text-white/20 select-none"
+              className="text-8xl md:text-9xl font-black text-white/25 select-none"
               animate={{
                 rotate: [0, 5, -5, 0],
                 scale: [1, 1.05, 1],
@@ -278,10 +268,10 @@ const DealBanner = () => {
                 ease: "easeInOut",
               }}
             >
-              🐉
+              🎄
             </motion.div>
             <motion.div
-              className="text-6xl md:text-7xl font-black text-white/20 select-none"
+              className="text-6xl md:text-7xl font-black text-white/25 select-none"
               animate={{
                 rotate: [0, -5, 5, 0],
                 scale: [1, 1.05, 1],
@@ -293,7 +283,7 @@ const DealBanner = () => {
                 delay: 0.5,
               }}
             >
-              🧧
+              ❄️
             </motion.div>
           </motion.div>
         </div>
