@@ -2,12 +2,49 @@ import { NextResponse } from "next/server";
 import { getPayOS } from "@/actions/createCheckoutSession";
 import { serverWriteClient } from "@/sanity/lib/server-client";
 
+type PayOSItem = {
+  id?: string;
+  name?: string;
+  price?: number;
+  quantity?: number;
+  image?: unknown;
+  _key?: string;
+};
+
+type PayOSWebhookPayload = {
+  data?: {
+    status?: string;
+    payment?: { status?: string };
+    orderCode?: number | string;
+    code?: number | string;
+    amount?: number;
+    description?: string;
+    buyerName?: string;
+    customerName?: string;
+    buyerPhone?: string;
+    customerPhone?: string;
+    buyerAddress?: string;
+    items?: PayOSItem[];
+  };
+  status?: string;
+  orderCode?: number | string;
+  code?: number | string;
+  amount?: number;
+  description?: string;
+  buyerName?: string;
+  customerName?: string;
+  buyerPhone?: string;
+  customerPhone?: string;
+  buyerAddress?: string;
+  items?: PayOSItem[];
+};
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    getPayOS().webhooks.verify(body);
+    const body = (await req.json()) as PayOSWebhookPayload;
+    getPayOS().webhooks.verify(body as unknown as any);
 
-    const data = (body as any)?.data || body;
+    const data = (body?.data || body) as any;
     const status = (data?.status || data?.payment?.status || "")
       .toString()
       .toUpperCase();
@@ -29,7 +66,7 @@ export async function POST(req: Request) {
     }
 
     // Parse metadata đính kèm trong description
-    let meta: any = null;
+    let meta: unknown = null;
     if (metaEncoded) {
       try {
         meta = JSON.parse(Buffer.from(metaEncoded, "base64").toString("utf8"));
@@ -38,10 +75,26 @@ export async function POST(req: Request) {
       }
     }
 
-    const addressMeta = meta?.address || {};
-    const userId = meta?.userId || null;
-    const itemsMeta = meta?.items || data?.items || [];
-    const totalAmount = amount ?? meta?.totalAmount ?? 0;
+    const addressMeta =
+      typeof meta === "object" && meta
+        ? (meta as { address?: Record<string, unknown> }).address || {}
+        : {};
+    const userId =
+      typeof meta === "object" && meta
+        ? (meta as { userId?: string | null }).userId || null
+        : null;
+    const itemsMeta =
+      (typeof meta === "object" && meta
+        ? (meta as { items?: PayOSItem[] }).items
+        : null) ||
+      data?.items ||
+      [];
+    const totalAmount =
+      amount ??
+      (typeof meta === "object" && meta
+        ? (meta as { totalAmount?: number }).totalAmount
+        : 0) ??
+      0;
 
     const fullName =
       addressMeta.fullName || data?.buyerName || data?.customerName || "Khách";
@@ -60,7 +113,7 @@ export async function POST(req: Request) {
       .join(", ");
 
     const products =
-      itemsMeta?.map((item: any, idx: number) => ({
+      itemsMeta?.map((item: PayOSItem, idx: number) => ({
         _key: item?.id
           ? `product-${item.id}`
           : item?._key || `item-${idx}-${Date.now()}`,
