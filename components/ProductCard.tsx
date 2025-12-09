@@ -94,14 +94,21 @@ const ProductCard = ({ product }: { product: Product }) => {
             5 đánh giá
           </p> */}
         </div>
-        {/* Tồn kho */}
-        <div className="flex items-center gap-2.5">
-          <p className="font-medium">Kho:</p>
-          <p
-            className={` ${product?.stock === 0 ? "text-red-600" : "text-shop_light_green font-semibold"}`}
-          >
-            {(product?.stock as number) > 0 ? product?.stock : "Hết hàng"}
-          </p>
+        {/* Tồn kho & giảm giá */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex items-center gap-2.5">
+            <p className="font-medium">Kho:</p>
+            <p
+              className={` ${product?.stock === 0 ? "text-red-600" : "text-shop_light_green font-semibold"}`}
+            >
+              {(product?.stock as number) > 0 ? product?.stock : "Hết hàng"}
+            </p>
+          </div>
+          {product?.discount ? (
+            <span className="text-xs font-semibold text-shop_orange border border-shop_orange/60 px-2 py-0.5 rounded-full shrink-0">
+              Giảm giá -{product.discount}%
+            </span>
+          ) : null}
         </div>
         <PriceView
           price={product?.price as number}

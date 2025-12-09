@@ -16,9 +16,6 @@ const PriceView = ({ price, discount, className }: Props) => {
             amount={price + (price * discount) / 100}
             className="text-shop_light_text line-through font-normal"
           />
-          <span className="text-xs font-semibold text-shop_orange border border-shop_orange/60 px-2 py-0.5 rounded-full shrink-0">
-            -{discount}%
-          </span>
         </>
       ) : null}
     </div>

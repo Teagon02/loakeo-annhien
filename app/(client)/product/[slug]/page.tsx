@@ -81,11 +81,18 @@ const SingleProductPage = async ({
 
           {/* Giá & tình trạng sản phẩm */}
           <div className="space-y-2 border-t border-b border-gray-200 py-5 ">
-            <PriceView
-              price={product?.price as number}
-              discount={product?.discount as number}
-              className="text-lg font-bold"
-            />
+            <div className="flex items-center gap-2.5">
+              <PriceView
+                price={product?.price as number}
+                discount={product?.discount as number}
+                className="text-lg font-bold"
+              />
+              {product?.discount ? (
+                <span className="text-xs font-semibold text-shop_orange border border-shop_orange/60 px-2 py-0.5 rounded-full shrink-0">
+                  Giảm giá -{product.discount}%
+                </span>
+              ) : null}
+            </div>
             <span className="inline-flex w-fit items-center gap-1 rounded-full bg-linear-to-r from-shop_dark_green/80 to-shop_btn_dark_green/80 px-3 py-1 text-xs font-semibold text-white shadow-sm">
               Đã bao gồm phí vận chuyển
             </span>
