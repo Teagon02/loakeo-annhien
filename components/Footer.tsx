@@ -7,11 +7,17 @@ import { SubText, SubTitle } from "./ui/text";
 import { quickLinksData } from "@/constants/data";
 import { getCategories } from "@/sanity/queries";
 import Link from "next/link";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+// import { Input } from "./ui/input";
+// import { Button } from "./ui/button";
+
+type CategoryItem = {
+  _id?: string;
+  slug?: { current?: string };
+  title?: string;
+};
 
 const Footer = async () => {
-  const categories = await getCategories();
+  const categories: CategoryItem[] = await getCategories();
 
   return (
     <footer className="bg-white border-t">
@@ -49,7 +55,7 @@ const Footer = async () => {
           <div>
             <SubTitle className="text-center">Danh mục sản phẩm</SubTitle>
             <ul className="grid grid-cols-2 gap-3 mt-4">
-              {categories?.map((item: any) => (
+              {categories?.map((item: CategoryItem) => (
                 <li key={item?._id || item?.slug?.current || item?.title}>
                   <Link
                     href={`/shop?category=${item?.slug?.current || ""}`}
