@@ -32,7 +32,10 @@ export const productType = defineType({
     defineField({
       name: "description",
       title: "Mô tả",
-      type: "string",
+      type: "text",
+      options: {
+        rows: 5, // textarea lớn hơn trong Studio
+      } as any,
     }),
     defineField({
       name: "price",

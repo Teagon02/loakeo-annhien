@@ -72,7 +72,8 @@ const Footer = () => {
         </div>
         <div className="text-center py-4 border-t text-sm text-gray-600">
           <div>
-            © {new Date().getFullYear()} <Logo className="text-sm" />
+            © {new Date().getFullYear()} LOA KÉO{" "}
+            <span className="text-shop_light_green">AN NHIÊN</span>
             {""} - All rights reserved.
           </div>
         </div>

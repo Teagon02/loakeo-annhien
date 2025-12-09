@@ -86,8 +86,11 @@ const SingleProductPage = async ({
               discount={product?.discount as number}
               className="text-lg font-bold"
             />
+            <span className="inline-flex w-fit items-center gap-1 rounded-full bg-linear-to-r from-shop_dark_green/80 to-shop_btn_dark_green/80 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+              Đã bao gồm phí vận chuyển
+            </span>
             <p
-              className={`px-4 py-1.5 inline-block text-sm text-center font-semibold rounded-lg ${product?.stock === 0 ? "bg-red-100 text-red-600" : "text-green-600 bg-green-100"}`}
+              className={`block w-fit px-4 py-1.5 text-sm text-center font-semibold rounded-lg ${product?.stock === 0 ? "bg-red-100 text-red-600" : "text-green-600 bg-green-100"}`}
             >{`${(product?.stock as number) > 0 ? "Có sẵn" : "Hết hàng"}`}</p>
           </div>
 
@@ -114,7 +117,7 @@ const SingleProductPage = async ({
               <CornerDownLeft size={30} className="text-shop_orange" />
               <div>
                 <p className="text-base font-semibold text-black">
-                  Đổi trả miễn phi
+                  Đổi trả miễn phí
                 </p>
                 <p className="text-sm text-gray-500 ">
                   Đổi trả miễn phí trong vòng 7 ngày.{" "}

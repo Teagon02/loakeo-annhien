@@ -8,14 +8,19 @@ interface Props {
 }
 const PriceView = ({ price, discount, className }: Props) => {
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-1.5">
       <PriceFormatter amount={price} className="text-shop_dark_green" />
-      {price && discount && (
-        <PriceFormatter
-          amount={price + (price * discount) / 100}
-          className="text-shop_light_text line-through font-normal"
-        />
-      )}
+      {price && discount ? (
+        <>
+          <PriceFormatter
+            amount={price + (price * discount) / 100}
+            className="text-shop_light_text line-through font-normal"
+          />
+          <span className="text-xs font-semibold text-shop_orange border border-shop_orange/60 px-2 py-0.5 rounded-full shrink-0">
+            -{discount}%
+          </span>
+        </>
+      ) : null}
     </div>
   );
 };
