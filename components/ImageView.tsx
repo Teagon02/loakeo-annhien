@@ -125,7 +125,7 @@ const ImageView = ({ images = [], isStock = undefined }: Props) => {
                   openFullscreen(currentIndex);
                 }
               }}
-              className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 active:bg-black/80 text-white p-2 md:p-2.5 rounded-full transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100 hoverEffect z-10 touch-manipulation"
+              className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 active:bg-black/80 text-white p-2 md:p-2.5 rounded-full transition-all opacity-100 hoverEffect z-10 touch-manipulation"
               aria-label="Phóng to ảnh"
             >
               <Maximize2 size={18} className="md:w-5 md:h-5" />
@@ -146,16 +146,18 @@ const ImageView = ({ images = [], isStock = undefined }: Props) => {
                 height={100}
                 className="w-full h-auto object-contain"
               />
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openFullscreen(index);
-                }}
-                className="absolute inset-0 bg-black/40 hover:bg-black/60 active:bg-black/70 text-white flex items-center justify-center transition-all opacity-100 md:opacity-0 md:group-hover/thumb:opacity-100 hoverEffect touch-manipulation"
-                aria-label="Phóng to ảnh"
-              >
-                <Maximize2 size={14} className="md:w-4 md:h-4" />
-              </button>
+              {active?._key === image?._key ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openFullscreen(index);
+                  }}
+                  className="absolute inset-0 bg-black/40 hover:bg-black/60 active:bg-black/70 text-white flex items-center justify-center transition-all opacity-100 hoverEffect touch-manipulation"
+                  aria-label="Phóng to ảnh"
+                >
+                  <Maximize2 size={14} className="md:w-4 md:h-4" />
+                </button>
+              ) : null}
             </button>
           ))}
         </div>
