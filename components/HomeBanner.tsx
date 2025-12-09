@@ -14,6 +14,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
+import Logo from "./Logo";
 
 const HomeBanner = () => {
   // Modern sound wave animation
@@ -159,23 +160,26 @@ const HomeBanner = () => {
                   }}
                 />
                 <h1 className="relative text-4xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight drop-shadow-lg">
-                  <motion.span
-                    className="block bg-linear-to-r from-shop_dark_green via-shop_light_green to-shop_dark_green bg-clip-text text-transparent bg-size-[220%_auto]"
-                    animate={{
-                      backgroundPosition: [
-                        "0% center",
-                        "200% center",
-                        "0% center",
-                      ],
-                    }}
-                    transition={{
-                      duration: 6,
-                      repeat: Infinity,
-                      ease: "linear",
-                    }}
-                  >
-                    Loa Kéo An Nhiên
-                  </motion.span>
+                  <div className="flex items-center gap-3 flex-nowrap">
+                    <Logo className="w-20 h-20 shrink-0" />
+                    <motion.span
+                      className="block whitespace-nowrap bg-linear-to-r from-shop_dark_green via-shop_light_green to-shop_dark_green bg-clip-text text-transparent bg-size-[220%_auto]"
+                      animate={{
+                        backgroundPosition: [
+                          "0% center",
+                          "200% center",
+                          "0% center",
+                        ],
+                      }}
+                      transition={{
+                        duration: 6,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                    >
+                      Loa Kéo An Nhiên
+                    </motion.span>
+                  </div>
                   <motion.span
                     className="mt-3 inline-flex items-center gap-3 text-xl md:text-2xl lg:text-3xl text-shop_dark_green/90"
                     initial={{ opacity: 0, y: 10 }}

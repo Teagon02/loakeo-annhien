@@ -7,79 +7,60 @@ export const headerData = [
   { title: "Tin tức", href: "/blog" },
 ];
 
-export const quickLinksData = [
-  {
-    title: "Giới thiệu",
-    href: "/aboutme",
-  },
-  {
-    title: "Liên hệ",
-    href: "/contact",
-  },
-  {
-    title: "Điều khoản",
-    href: "/dieu-khoan",
-  },
-  {
-    title: "Chính sách",
-    href: "/chinh-sach",
-  },
-  {
-    title: "Câu hỏi thường gặp",
-    href: "/cau-hoi-thuong-gap",
-  },
-];
-
-export const categoriesData = [
-  {
-    title: "Loa kéo",
-    href: "loa-keo",
-  },
-  {
-    title: "Loa xách tay",
-    href: "loa-xach-tay",
-  },
-  {
-    title: "Bo mạch",
-    href: "bo-mach",
-  },
-  {
-    title: "Micro",
-    href: "micro",
-  },
-  {
-    title: "Main",
-    href: "main",
-  },
-  {
-    title: "Vang",
-    href: "vang",
-  },
-  {
-    title: "Bass",
-    href: "bass",
-  },
-  {
-    title: "Treble",
-    href: "treble",
-  },
-  {
-    title: "Subwoofer",
-    href: "subwoofer",
-  },
-  {
-    title: "Ắc quy",
-    href: "ac-quy",
-  },
-  {
-    title: "Vỏ loa",
-    href: "vo-loa",
-  },
-  {
-    title: "Mạch phân tầng",
-    href: "mach-phan-tang",
-  },
-];
+// export const categoriesData = [
+//   {
+//     title: "Loa kéo bình",
+//     href: "loa-keo-binh",
+//   },
+//   {
+//     title: "Loa kéo điện",
+//     href: "loa-keo-dien",
+//   },
+//   {
+//     title: "Loa xách tay",
+//     href: "loa-xach-tay",
+//   },
+//   {
+//     title: "Bo mạch",
+//     href: "bo-mach",
+//   },
+//   {
+//     title: "Micro",
+//     href: "micro",
+//   },
+//   {
+//     title: "Main",
+//     href: "main",
+//   },
+//   {
+//     title: "Vang",
+//     href: "vang",
+//   },
+//   {
+//     title: "Bass",
+//     href: "bass",
+//   },
+//   {
+//     title: "Treble",
+//     href: "treble",
+//   },
+//   {
+//     title: "Subwoofer",
+//     href: "subwoofer",
+//   },
+//   {
+//     title: "Ắc quy",
+//     href: "ac-quy",
+//   },
+//   {
+//     title: "Vỏ loa",
+//     href: "vo-loa",
+//   },
+//   {
+//     title: "Mạch phân tầng",
+//     href: "mach-phan-tang",
+//   },
+// ];
 
 export const productType = [
   {
