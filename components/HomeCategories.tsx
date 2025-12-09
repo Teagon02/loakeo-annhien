@@ -15,11 +15,44 @@ const HomeCategories = ({
 }: {
   categories: CategoryWithProductCount[];
 }) => {
+  // Ưu tiên 6 danh mục "hot" (theo slug chuẩn hóa), fallback 6 cuối
+  const hotKeys = [
+    "loa-keo-binh-ac-quy",
+    "loa-keo-dien",
+    "loa-xach-tay",
+    "bass",
+    "micro",
+    "vo-loa",
+  ];
+
+  const normalize = (value?: string | null) =>
+    (value || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "-");
+
+  const hotCategories = (categories ?? [])
+    .map((cat) => ({
+      cat,
+      rank: hotKeys.indexOf(
+        normalize(cat?.slug?.current) || normalize(cat?.title)
+      ),
+    }))
+    .filter((item) => item.rank >= 0)
+    .sort((a, b) => a.rank - b.rank)
+    .map((item) => item.cat)
+    .slice(0, 6);
+
+  const displayCategories =
+    hotCategories.length > 0 ? hotCategories : (categories?.slice(-6) ?? []);
+
   return (
     <div className="bg-white border border-shop_light_green/20 my-10 md:my-20 p-5 lg:p-7 rounded-md">
       <Title className="border-b pb-3">Danh mục sản phẩm</Title>
       <div className="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {categories?.map((category: CategoryWithProductCount) => (
+        {displayCategories?.map((category: CategoryWithProductCount) => (
           <div
             key={category?._id}
             className="bg-shop_light_bg p-5 flex items-center gap-3 group"
@@ -44,7 +77,15 @@ const HomeCategories = ({
               </div>
             )}
             <div className="space-y-1">
-              <h3 className="text-base font-semibold">{category?.title}</h3>
+              <Link
+                href={{
+                  pathname: "/shop",
+                  query: { category: category?.slug?.current },
+                }}
+                className="text-base font-semibold hover:text-shop_dark_green hoverEffect"
+              >
+                {category?.title}
+              </Link>
               <p className="text-sm">
                 <span className="font-bold text-shop_dark_green">{`(${category?.productCount ?? 0})`}</span>{" "}
                 hàng có sẵn

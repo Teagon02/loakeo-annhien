@@ -7,10 +7,33 @@ export const headerData = [
   { title: "Tin tức", href: "/blog" },
 ];
 
+export const quickLinksData = [
+  {
+    title: "Giới thiệu",
+    href: "/aboutme",
+  },
+  {
+    title: "Liên hệ",
+    href: "/contact",
+  },
+  {
+    title: "Điều khoản",
+    href: "/dieu-khoan",
+  },
+  {
+    title: "Chính sách",
+    href: "/chinh-sach",
+  },
+  {
+    title: "Câu hỏi thường gặp",
+    href: "/cau-hoi-thuong-gap",
+  },
+];
+
 // export const categoriesData = [
 //   {
-//     title: "Loa kéo bình",
-//     href: "loa-keo-binh",
+//     title: "Loa kéo bình ắc quy",
+//     href: "loa-keo-binh-ac-quy",
 //   },
 //   {
 //     title: "Loa kéo điện",

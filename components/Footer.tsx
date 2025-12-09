@@ -4,17 +4,20 @@ import FooterTop from "./FooterTop";
 import Logo from "./Logo";
 import SocialMedia from "./SocialMedia";
 import { SubText, SubTitle } from "./ui/text";
-import { categoriesData, quickLinksData } from "@/constants/data";
+import { quickLinksData } from "@/constants/data";
+import { getCategories } from "@/sanity/queries";
 import Link from "next/link";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 
-const Footer = () => {
+const Footer = async () => {
+  const categories = await getCategories();
+
   return (
     <footer className="bg-white border-t">
       <Container>
         <FooterTop />
-        <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Logo & Social Media */}
           <div className="space-y-4">
             <Logo />
@@ -46,20 +49,20 @@ const Footer = () => {
           <div>
             <SubTitle className="text-center">Danh mục sản phẩm</SubTitle>
             <ul className="grid grid-cols-2 gap-3 mt-4">
-              {categoriesData?.map((item) => (
-                <li key={item?.title}>
+              {categories?.map((item: any) => (
+                <li key={item?._id || item?.slug?.current || item?.title}>
                   <Link
-                    href={`/shop?category=${item?.href}`}
+                    href={`/shop?category=${item?.slug?.current || ""}`}
                     className="hover:text-shop_light_green hoverEffect font-medium"
                   >
-                    {item?.title}
+                    {item?.title || "Danh mục"}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
           {/* Contact */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <SubTitle>Sản phẩm mới & quà tặng</SubTitle>
             <SubText>
               Nhập email để nhận thông báo khuyến mãi và quà tặng đặc biệt.
@@ -68,7 +71,7 @@ const Footer = () => {
               <Input type="email" placeholder="Nhập Email của bạn" />
               <Button className="w-full">Chấp nhận</Button>
             </form>
-          </div>
+          </div> */}
         </div>
         <div className="text-center py-4 border-t text-sm text-gray-600">
           <div className="font-bold">
