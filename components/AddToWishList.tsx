@@ -57,7 +57,7 @@ const AddToWishList = ({
         )}
       >
         <Link href="/wishlist">
-          <div className="p-2.5 rounded-full hover:bg-shop_dark_green hover:text-white hoverEffect bg-lightColor/10">
+          <div className="p-2.5 rounded-full bg-white text-black hover:bg-shop_orange hoverEffect">
             <Heart size={15} />
           </div>
         </Link>
@@ -74,7 +74,7 @@ const AddToWishList = ({
     >
       <div
         onClick={handleFavorite}
-        className={`p-2.5 rounded-full hover:bg-shop_dark_green hover:text-white hoverEffect ${existingProduct ? "bg-shop_dark_green text-white" : "bg-lightColor/10"}`}
+        className={`p-2.5 rounded-full hover:bg-shop_orange hover:text-white hoverEffect ${existingProduct ? "bg-shop_orange text-white" : "bg-white"}`}
       >
         <Heart size={15} fill={existingProduct ? "white" : "none"} />
       </div>

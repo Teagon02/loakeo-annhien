@@ -51,8 +51,8 @@ const ProductCard = ({ product }: { product: Product }) => {
           </p>
         )}
         {product?.status === "new" && (
-          <p className="absolute top-2 left-2 z-10 text-xs border border-darkColor/50 px-2 rounded-full group-hover:border-shop_light_green group-hover:text-shop_dark_green hoverEffect">
-            Mới
+          <p className="absolute top-2 left-2 z-10 text-xs border bg-white text-red-500 px-2 rounded-full font-bold hoverEffect">
+            Mới!
           </p>
         )}
         {product?.status === "hot" && (
