@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPayOS } from "@/actions/createCheckoutSession";
 import { serverWriteClient } from "@/sanity/lib/server-client";
+import type { PayOS } from "@payos/node";
 
 type PayOSItem = {
   id?: string;
@@ -36,15 +37,23 @@ type PayOSWebhookPayload = {
   buyerPhone?: string;
   customerPhone?: string;
   buyerAddress?: string;
+  payment?: { status?: string };
   items?: PayOSItem[];
 };
 
+type PayOSWebhookVerifyInput = Parameters<
+  ReturnType<typeof getPayOS>["webhooks"]["verify"]
+>[0];
+
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as PayOSWebhookPayload;
-    getPayOS().webhooks.verify(body as unknown as any);
+    const body = (await req.json()) as PayOSWebhookPayload &
+      PayOSWebhookVerifyInput;
+    getPayOS().webhooks.verify(body as PayOSWebhookVerifyInput);
 
-    const data = (body?.data || body) as any;
+    const data =
+      (body?.data as PayOSWebhookPayload["data"]) ||
+      (body as PayOSWebhookPayload);
     const status = (data?.status || data?.payment?.status || "")
       .toString()
       .toUpperCase();
@@ -100,6 +109,8 @@ export async function POST(req: Request) {
       addressMeta.fullName || data?.buyerName || data?.customerName || "Khách";
     const phone =
       addressMeta.phone || data?.buyerPhone || data?.customerPhone || "N/A";
+    const fullNameStr = String(fullName ?? "Khách");
+    const phoneStr = String(phone ?? "N/A");
     const addressLine =
       addressMeta.addressLine ||
       addressMeta.address ||
@@ -112,22 +123,29 @@ export async function POST(req: Request) {
       .filter(Boolean)
       .join(", ");
 
+    const addressLineStr = String(addressLine ?? "");
+    const wardStr = ward ? String(ward) : undefined;
+    const districtStr = district ? String(district) : undefined;
+    const provinceStr = province ? String(province) : undefined;
+
     const products =
       itemsMeta?.map((item: PayOSItem, idx: number) => ({
         _key: item?.id
           ? `product-${item.id}`
           : item?._key || `item-${idx}-${Date.now()}`,
-        _type: "object",
+        _type: "object" as const,
         product: item?.id
           ? {
-              _type: "reference",
+              _type: "reference" as const,
               _ref: item.id,
             }
           : undefined,
         name: item?.name,
         price: Math.round(item?.price || 0),
         quantity: item?.quantity || 1,
-        image: item?.image ? { _type: "image", asset: item.image } : undefined,
+        image: item?.image
+          ? { _type: "image" as const, asset: item.image as unknown }
+          : undefined,
       })) || [];
 
     // Tránh tạo trùng
@@ -143,19 +161,47 @@ export async function POST(req: Request) {
     }
 
     // Tạo order khi thanh toán thành công
-    const doc: any = {
+    type OrderDoc = {
+      _type: "order";
+      orderNumber: string;
+      status: "paid" | "shipped" | "cancelled";
+      totalPrice: number;
+      orderDate: string;
+      shippingAddress: {
+        fullName: string;
+        phone: string;
+        address: string;
+        ward?: string;
+        district?: string;
+        city?: string;
+        fullAddress?: string;
+      };
+      products: {
+        _key: string;
+        _type: "object";
+        product?: { _type: "reference"; _ref: string };
+        name?: string;
+        price?: number;
+        quantity?: number;
+        image?: { _type: "image"; asset: unknown };
+      }[];
+      payosOrderCode: number;
+      clerkUserId?: string | null;
+    };
+
+    const doc: OrderDoc = {
       _type: "order",
       orderNumber: `PAYOS-${orderCode}`,
       status: "paid",
       totalPrice: Math.round(totalAmount),
       orderDate: new Date().toISOString(),
       shippingAddress: {
-        fullName,
-        phone,
-        address: addressLine.toString().trim(),
-        ward,
-        district,
-        city: province,
+        fullName: fullNameStr,
+        phone: phoneStr,
+        address: addressLineStr.trim(),
+        ward: wardStr,
+        district: districtStr,
+        city: provinceStr,
         fullAddress,
       },
       products,
