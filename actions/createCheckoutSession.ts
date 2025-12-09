@@ -3,6 +3,7 @@ import { PayOS } from "@payos/node";
 import { Address } from "@/sanity.types";
 import { CartItem } from "@/store";
 import { serverWriteClient } from "@/sanity/lib/server-client";
+import { nanoid } from "nanoid";
 
 let payos: PayOS | null = null;
 
@@ -37,7 +38,18 @@ type CheckoutPayload = {
   cancelUrl?: string;
 };
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+const getBaseUrl = () => {
+  const envBase = process.env.NEXT_PUBLIC_BASE_URL;
+  const vercelUrl = process.env.VERCEL_URL;
+  const urlCandidate =
+    envBase || (vercelUrl ? `https://${vercelUrl}` : undefined);
+
+  if (!urlCandidate) {
+    throw new Error("Thiếu cấu hình NEXT_PUBLIC_BASE_URL.");
+  }
+
+  return urlCandidate;
+};
 const SANITY_WRITE_TOKEN = process.env.SANITY_API_WRITE_TOKEN;
 
 const buildOrderCode = () => Number(`${Date.now()}`.slice(-10)); // PayOS requires numeric orderCode
@@ -154,16 +166,16 @@ export async function createCheckoutSession({
     throw new Error("Số tiền thanh toán không hợp lệ.");
   }
 
-  if (!BASE_URL) {
-    throw new Error("Thiếu cấu hình NEXT_PUBLIC_BASE_URL.");
-  }
-
+  const BASE_URL = getBaseUrl();
   try {
     const orderCode = buildOrderCode();
     const paymentData = {
       orderCode,
       amount: Math.round(totalAmount),
-      description: description || `Ma don hang: ${orderCode}`,
+      // PayOS giới hạn 25 ký tự cho description
+      description: (description || `Ma DH ${orderCode}`)
+        .toString()
+        .slice(0, 25),
       items: items.map(({ product, quantity }) => ({
         name: product?.name || "Sản phẩm",
         quantity,
@@ -176,7 +188,6 @@ export async function createCheckoutSession({
     };
 
     const paymentLink = await getPayOS().paymentRequests.create(paymentData);
-    void createOrderDraft({ orderCode, items, totalAmount, address, userId });
 
     return {
       checkoutUrl: paymentLink.checkoutUrl,
