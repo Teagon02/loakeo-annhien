@@ -1,4 +1,3 @@
-import { PayOS } from "@payos/node";
 import { NextResponse } from "next/server";
 import payos from "@/lib/payos";
 import { serverWriteClient } from "@/sanity/lib/server-client";
@@ -64,8 +63,9 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Webhook Error:", error);
-    return NextResponse.json({ success: false, error: error.message });
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ success: false, error: message });
   }
 }
