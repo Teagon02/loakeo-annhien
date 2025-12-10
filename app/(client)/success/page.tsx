@@ -2,7 +2,7 @@
 
 import useStore from "@/store";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { motion } from "motion/react";
 import {
   Check,
@@ -14,7 +14,7 @@ import {
 } from "lucide-react"; // Thêm icon XCircle
 import Link from "next/link";
 
-const SuccessPage = () => {
+const SuccessContent = () => {
   const { resetCart } = useStore();
   const searchParams = useSearchParams();
 
@@ -146,5 +146,17 @@ const SuccessPage = () => {
     </div>
   );
 };
+
+const SuccessPage = () => (
+  <Suspense
+    fallback={
+      <div className="py-10 flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-10 h-10 animate-spin text-blue-500" />
+      </div>
+    }
+  >
+    <SuccessContent />
+  </Suspense>
+);
 
 export default SuccessPage;
