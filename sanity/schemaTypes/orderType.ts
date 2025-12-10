@@ -21,7 +21,7 @@ export const orderType = defineType({
     defineField({
       name: "orderNumber",
       title: "ID",
-      type: "string",
+      type: "number",
       group: "main",
       readOnly: true,
       validation: (Rule) => Rule.required(),

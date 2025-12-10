@@ -203,7 +203,7 @@ const GuestAddressForm = ({
           </div>
 
           <Button type="submit" className="w-full">
-            Lưu thông tin
+            Chấp nhận
           </Button>
         </form>
       </CardContent>

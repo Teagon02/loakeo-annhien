@@ -323,7 +323,7 @@ const BuyNowPage = () => {
                 ? "Đang xử lý..."
                 : isOutOfStock
                   ? "Hết hàng"
-                  : "Thanh toán ngay"}
+                  : "Thanh toán"}
             </Button>
           </div>
         </div>

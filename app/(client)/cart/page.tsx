@@ -40,11 +40,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import AddressFormDialog from "@/components/AddressFormDialog";
-import {
-  createCheckoutSession,
-  Metadata,
-  GroupedCartItems,
-} from "@/actions/createCheckoutSession";
 
 const CartPage = () => {
   const {
@@ -103,24 +98,6 @@ const CartPage = () => {
 
     setLoading(true);
     try {
-      // 1. chuẩn bị dữ liệu lưu vào database
-      const metadata: Metadata = {
-        orderNumber: crypto.randomUUID(),
-        customerName: selectedAddress?.fullName ?? "Vãng lai",
-        clerkUserId: user?.id,
-      };
-      // 2. Gọi server action để tạo link thanh toán trên PayOS
-      const checkoutUrl = await createCheckoutSession(
-        groupedItems,
-        metadata,
-        selectedAddress
-      );
-      console.log("checkoutUrl", checkoutUrl);
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl;
-      } else {
-        toast.error("Không thể khởi tạo thanh toán.");
-      }
     } catch (error) {
       console.error("Error checkout session:", error);
       const errorMessage =
