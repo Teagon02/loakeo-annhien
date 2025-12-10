@@ -40,6 +40,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import AddressFormDialog from "@/components/AddressFormDialog";
+import {
+  createCheckoutSession,
+  Metadata,
+  GroupedCartItems,
+} from "@/actions/createCheckoutSession";
 
 const CartPage = () => {
   const {
@@ -55,7 +60,7 @@ const CartPage = () => {
   const { user } = useUser();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
-  console.log("addresses", addresses);
+
   const fetchAddresses = useCallback(async () => {
     if (!user?.id) return;
 
@@ -98,46 +103,26 @@ const CartPage = () => {
 
     setLoading(true);
     try {
-      const response = await fetch("/api/payos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: groupedItems,
-          totalAmount: getTotalPrice(),
-          address: selectedAddress,
-          userId: user?.id || null,
-        }),
-      });
-
-      type PayOSResponse =
-        | { checkoutUrl: string; orderCode: number }
-        | { error: string };
-      let data: PayOSResponse | null = null;
-      try {
-        data = await response.json();
-      } catch {
-        // fallback when server returns HTML error
-        throw new Error(
-          "Không thể tạo link thanh toán (phản hồi không hợp lệ)."
-        );
+      // 1. chuẩn bị dữ liệu lưu vào database
+      const metadata: Metadata = {
+        orderNumber: crypto.randomUUID(),
+        customerName: selectedAddress?.fullName ?? "Vãng lai",
+        clerkUserId: user?.id,
+      };
+      // 2. Gọi server action để tạo link thanh toán trên PayOS
+      const checkoutUrl = await createCheckoutSession(
+        groupedItems,
+        metadata,
+        selectedAddress
+      );
+      console.log("checkoutUrl", checkoutUrl);
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl;
+      } else {
+        toast.error("Không thể khởi tạo thanh toán.");
       }
-      if (!response.ok) {
-        const errorMessage =
-          data && "error" in data
-            ? data.error
-            : `Không thể tạo link thanh toán (mã ${response.status}).`;
-        throw new Error(errorMessage);
-      }
-
-      if (!data || !("checkoutUrl" in data) || !data.checkoutUrl) {
-        throw new Error("Không nhận được link thanh toán từ PayOS.");
-      }
-
-      window.location.href = data.checkoutUrl;
     } catch (error) {
-      console.error("PayOS checkout error:", error);
+      console.error("Error checkout session:", error);
       const errorMessage =
         error instanceof Error
           ? error.message

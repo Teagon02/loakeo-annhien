@@ -13,15 +13,6 @@ import { Eye } from "lucide-react";
 import { TooltipContent } from "@/components/ui/tooltip";
 import OrderDetailDialog from "./OrderDetailDialog";
 
-// Hàm map trạng thái cho khách hàng: luôn hiển thị "Đã thanh toán" (trừ khi hủy)
-const getCustomerStatus = (status?: string) => {
-  if (status === "cancelled") {
-    return { text: "Đã hủy", className: "bg-red-100 text-red-800" };
-  }
-  // Với "paid" hoặc "shipped", khách hàng đều thấy "Đã thanh toán"
-  return { text: "Đã thanh toán", className: "bg-green-100 text-green-800" };
-};
-
 const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
   const [selectedOrder, setSelectedOrder] = useState<
     MY_ORDERS_QUERYResult[0] | null
@@ -38,7 +29,6 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
       <TableBody>
         <TooltipProvider>
           {orders.map((order) => {
-            const customerStatus = getCustomerStatus(order?.status);
             return (
               <Tooltip key={order?.orderNumber}>
                 <TooltipTrigger asChild>
@@ -69,9 +59,15 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
                     <TableCell>
                       {order?.status && (
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-semibold ${customerStatus.className}`}
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${order?.status === "pending" ? "bg-yellow-100 text-yellow-800" : order?.status === "paid" ? "bg-green-100 text-green-800" : order?.status === "shipped" ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"}`}
                         >
-                          {customerStatus.text}
+                          {order?.status === "pending"
+                            ? "Chờ thanh toán"
+                            : order?.status === "paid"
+                              ? "Đã thanh toán"
+                              : order?.status === "shipped"
+                                ? "Đã gửi hàng"
+                                : "Đã hủy"}
                         </span>
                       )}
                     </TableCell>

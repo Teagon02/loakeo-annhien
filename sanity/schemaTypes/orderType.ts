@@ -33,13 +33,13 @@ export const orderType = defineType({
       group: "main",
       options: {
         list: [
-          { title: "🔴 Đã thanh toán - Nhưng chưa gửi hàng", value: "paid" },
+          { title: "🔄 Chờ thanh toán", value: "pending" },
+          { title: "🔴 Đã thanh toán", value: "paid" },
           { title: "✅ Đã gửi hàng", value: "shipped" },
           { title: "❌ Đã hủy", value: "cancelled" },
         ],
         layout: "radio", // Bấm nhanh
       },
-      initialValue: "paid",
     }),
     defineField({
       name: "totalPrice",
@@ -209,6 +209,7 @@ export const orderType = defineType({
     },
     prepare({ orderId, amount, status, fullName, phone }) {
       const statusIcons: any = {
+        pending: "🔄",
         paid: "🔴", // Màu xanh lá -> Chưa giao hàng
         shipped: "✅", // Tích xanh -> Đã giao hàng
         cancelled: "❌",

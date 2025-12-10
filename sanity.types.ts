@@ -221,7 +221,7 @@ export type Order = {
   _updatedAt: string;
   _rev: string;
   orderNumber?: string;
-  status?: "paid" | "shipped" | "cancelled";
+  status?: "pending" | "paid" | "shipped" | "cancelled";
   totalPrice?: number;
   orderDate?: string;
   clerkUserId?: string;
@@ -538,7 +538,7 @@ export type MY_ORDERS_QUERYResult = Array<{
   _updatedAt: string;
   _rev: string;
   orderNumber?: string;
-  status?: "cancelled" | "paid" | "shipped";
+  status?: "cancelled" | "paid" | "pending" | "shipped";
   totalPrice?: number;
   orderDate?: string;
   clerkUserId?: string;
