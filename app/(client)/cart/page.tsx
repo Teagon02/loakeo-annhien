@@ -40,6 +40,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import AddressFormDialog from "@/components/AddressFormDialog";
+import { createCheckoutSession } from "@/actions/createCheckoutSession";
 
 const CartPage = () => {
   const {
@@ -98,6 +99,18 @@ const CartPage = () => {
 
     setLoading(true);
     try {
+      // gọi server action để tạo link thanh toán
+      const checkoutUrl = await createCheckoutSession({
+        items: groupedItems,
+        address: selectedAddress,
+        userId: user?.id as string,
+        totalPrice: getTotalPrice(),
+      });
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl.url;
+      } else {
+        toast.error("Không thể khởi tạo thanh toán.");
+      }
     } catch (error) {
       console.error("Error checkout session:", error);
       const errorMessage =

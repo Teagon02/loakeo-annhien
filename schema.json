@@ -1297,7 +1297,7 @@
       "orderNumber": {
         "type": "objectAttribute",
         "value": {
-          "type": "string"
+          "type": "number"
         },
         "optional": true
       },
@@ -1548,7 +1548,7 @@
         },
         "optional": true
       },
-      "payosOrderCode": {
+      "transactionCode": {
         "type": "objectAttribute",
         "value": {
           "type": "number"

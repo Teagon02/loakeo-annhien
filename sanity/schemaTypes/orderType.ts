@@ -14,13 +14,13 @@ export const orderType = defineType({
       default: true,
       icon: BasketIcon,
     },
-    { name: "admin", title: "Mã đơn hàng - PayOS", icon: CreditCardIcon },
+    { name: "admin", title: "Mã giao dịch", icon: CreditCardIcon },
   ],
   fields: [
     // --- NHÓM 1: TRẠNG THÁI (Để bạn quản lý công việc) ---
     defineField({
       name: "orderNumber",
-      title: "ID",
+      title: "Mã đơn hàng",
       type: "number",
       group: "main",
       readOnly: true,
@@ -188,13 +188,13 @@ export const orderType = defineType({
 
     // --- NHÓM 4: PAYOS (tối giản, chỉ lưu các giá trị cần theo dõi) ---
     defineField({
-      name: "payosOrderCode",
-      title: "PayOS orderCode (số)",
+      name: "transactionCode",
+      title: "Mã giao dịch ngân hàng",
       type: "number",
       group: "admin",
       readOnly: true,
-      description: "orderCode trả về từ PayOS, dùng để đối soát webhook.",
-      validation: (Rule) => Rule.required(),
+      description: "Mã giao dịch ngân hàng.",
+      // validation: (Rule) => Rule.required(),
     }),
   ],
 

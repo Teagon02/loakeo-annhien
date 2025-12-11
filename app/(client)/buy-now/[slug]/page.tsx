@@ -100,7 +100,7 @@ const BuyNowPage = () => {
         fullName: `${selectedAddress.fullName} (vãng lai)`,
       };
 
-      const response = await fetch("/api/payos", {
+      const response = await fetch("/api/payos-webhook", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
