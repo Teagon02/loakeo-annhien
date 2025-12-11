@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { serverWriteClient } from "@/sanity/lib/server-client";
+import { serverWriteClient } from "@/sanity/lib/client";
 
 interface AddressRequestBody {
   fullName: string;
