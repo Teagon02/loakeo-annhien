@@ -52,11 +52,10 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // 2. Ép kiểu kết quả trả về (as unknown as PayOSWebhookData)
-    // Lưu ý: payos.webhooks.verify là hàm đồng bộ (không cần await), nhưng nếu bạn để await cũng không sao.
-    const webhookData = payos.webhooks.verify(
+    // 2. Xác thực Webhook. Thư viện trả Promise → cần await để nhận object, tránh log Promise pending.
+    const webhookData = (await payos.webhooks.verify(
       body
-    ) as unknown as PayOSWebhookData;
+    )) as unknown as PayOSWebhookData;
 
     console.log("Nhận Webhook từ PayOS:", webhookData);
 
@@ -64,9 +63,16 @@ export async function POST(req: NextRequest) {
       // 3. Lúc này TypeScript sẽ hiểu .data và .orderCode là gì, không báo lỗi nữa
       const orderCode = webhookData.data.orderCode;
       const transactionRef = webhookData.data.reference;
+      console.log(
+        "[DEBUG] orderCode:",
+        orderCode,
+        "transactionRef:",
+        transactionRef
+      );
 
       const query = `*[_type == "order" && orderNumber == $orderCode][0]._id`;
       const orderId = await serverWriteClient.fetch(query, { orderCode });
+      console.log("[DEBUG] orderId from Sanity:", orderId);
 
       if (orderId) {
         await serverWriteClient
@@ -78,6 +84,8 @@ export async function POST(req: NextRequest) {
           .commit();
 
         console.log(`✅ Đã cập nhật đơn hàng ${orderCode} thành công.`);
+      } else {
+        console.warn(`⚠️ Không tìm thấy order với orderNumber=${orderCode}.`);
       }
     }
 
