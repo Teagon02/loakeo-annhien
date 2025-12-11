@@ -71,12 +71,6 @@ const OrderDetailDialog = ({
                           : "Đã hủy"}
                   </span>
                 </div>
-                {order.payosOrderCode && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Mã thanh toán:</span>
-                    <span className="font-medium">{order.payosOrderCode}</span>
-                  </div>
-                )}
               </div>
             </div>
 

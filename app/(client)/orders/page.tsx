@@ -33,16 +33,15 @@ const OrdersPage = async () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px] md:w-auto">ID</TableHead>
+                      <TableHead className="w-[100px] md:w-auto">
+                        Mã đơn hàng
+                      </TableHead>
                       <TableHead className="hidden md:table-cell">
                         Ngày đặt
                       </TableHead>
                       <TableHead>Khách hàng</TableHead>
                       <TableHead>Tổng tiền</TableHead>
                       <TableHead>Trạng thái</TableHead>
-                      <TableHead className="hidden sm:table-cell">
-                        Mã đơn hàng
-                      </TableHead>
                       <TableHead className="text-center w-[80px] min-w-[80px]">
                         Hành động
                       </TableHead>
