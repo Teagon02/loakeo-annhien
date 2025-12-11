@@ -12,9 +12,13 @@ export function OPTIONS() {
   return NextResponse.json(null, {
     status: 200,
     headers: {
-      Allow: "POST, GET, OPTIONS",
+      Allow: "POST, GET, OPTIONS, HEAD",
     },
   });
+}
+
+export function HEAD() {
+  return NextResponse.json(null, { status: 200 });
 }
 
 // 1. Định nghĩa kiểu dữ liệu Webhook
@@ -44,6 +48,7 @@ type PayOSWebhookData = {
 };
 
 export async function POST(req: NextRequest) {
+  console.log("🚀 [DEBUG] Code đã CHẠY VÀO file route.ts thành công!");
   try {
     const body = await req.json();
 
