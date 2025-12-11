@@ -224,7 +224,7 @@ export type Order = {
   status?: "pending" | "paid" | "shipped" | "cancelled";
   totalPrice?: number;
   orderDate?: string;
-  paymentDate?: string;
+  transactionDateTime?: string;
   clerkUserId?: string;
   shippingAddress?: {
     fullName?: string;
@@ -542,7 +542,7 @@ export type MY_ORDERS_QUERYResult = Array<{
   status?: "cancelled" | "paid" | "pending" | "shipped";
   totalPrice?: number;
   orderDate?: string;
-  paymentDate?: string;
+  transactionDateTime?: string;
   clerkUserId?: string;
   shippingAddress: {
     fullName?: string;

@@ -1340,7 +1340,7 @@
         },
         "optional": true
       },
-      "paymentDate": {
+      "transactionDateTime": {
         "type": "objectAttribute",
         "value": {
           "type": "string"

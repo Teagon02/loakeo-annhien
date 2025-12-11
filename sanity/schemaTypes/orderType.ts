@@ -58,7 +58,7 @@ export const orderType = defineType({
       readOnly: true,
     }),
     defineField({
-      name: "paymentDate",
+      name: "transactionDateTime",
       title: "Ngày thanh toán",
       type: "datetime",
       group: "main",

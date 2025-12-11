@@ -51,7 +51,7 @@ type PayOSWebhookData = {
 };
 
 export async function POST(req: NextRequest) {
-  console.log("🚀 [DEBUG] Code đã CHẠY VÀO file route.ts thành công!");
+  console.log("[DEBUG] Code đã CHẠY VÀO webhook file route.ts thành công!");
   try {
     const body = await req.json();
 
@@ -92,6 +92,7 @@ export async function POST(req: NextRequest) {
           .set({
             status: "paid",
             transactionCode: transactionRef,
+            transactionDateTime: webhookData.transactionDateTime,
           })
           .commit();
 
