@@ -22,29 +22,32 @@ export function HEAD() {
 }
 
 // 1. Định nghĩa kiểu dữ liệu Webhook
+// PayOS trả về object phẳng hoặc trong field data tùy cấu hình.
 type PayOSWebhookData = {
-  code: string;
-  desc: string;
-  success: boolean;
-  data: {
-    orderCode: number;
-    amount: number;
-    description: string;
-    accountNumber: string;
-    reference: string; // Đây là mã giao dịch ngân hàng
-    transactionDateTime: string;
-    currency: string;
-    paymentLinkId: string;
-    code: string;
-    desc: string;
-    counterAccountBankId?: string | null;
-    counterAccountBankName?: string | null;
-    counterAccountName?: string | null;
-    counterAccountNumber?: string | null;
-    virtualAccountName?: string | null;
-    virtualAccountNumber?: string | null;
+  code?: string;
+  desc?: string;
+  success?: boolean;
+  orderCode?: number;
+  amount?: number;
+  description?: string;
+  accountNumber?: string;
+  reference?: string;
+  transactionDateTime?: string;
+  currency?: string;
+  paymentLinkId?: string;
+  counterAccountBankId?: string | null;
+  counterAccountBankName?: string | null;
+  counterAccountName?: string | null;
+  counterAccountNumber?: string | null;
+  virtualAccountName?: string | null;
+  virtualAccountNumber?: string | null;
+  data?: {
+    orderCode?: number;
+    reference?: string;
+    code?: string;
+    desc?: string;
   };
-  signature: string;
+  signature?: string;
 };
 
 export async function POST(req: NextRequest) {
@@ -59,10 +62,19 @@ export async function POST(req: NextRequest) {
 
     console.log("Nhận Webhook từ PayOS:", webhookData);
 
-    if (webhookData.code === "00") {
-      // 3. Lúc này TypeScript sẽ hiểu .data và .orderCode là gì, không báo lỗi nữa
-      const orderCode = webhookData.data.orderCode;
-      const transactionRef = webhookData.data.reference;
+    // Một số webhook trả code ở top-level, một số nằm trong data
+    const code = webhookData.code || webhookData.data?.code;
+    const orderCode = webhookData.orderCode ?? webhookData.data?.orderCode;
+    const transactionRef = webhookData.reference ?? webhookData.data?.reference;
+
+    if (code === "00") {
+      if (!orderCode) {
+        console.warn("⚠️ orderCode missing in payload:", webhookData);
+        return NextResponse.json(
+          { success: false, message: "Missing orderCode" },
+          { status: 400 }
+        );
+      }
       console.log(
         "[DEBUG] orderCode:",
         orderCode,
