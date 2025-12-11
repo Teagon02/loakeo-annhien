@@ -54,8 +54,14 @@ export const orderType = defineType({
       title: "Ngày khách đặt",
       type: "datetime",
       group: "main",
-
       initialValue: () => new Date().toISOString(),
+      readOnly: true,
+    }),
+    defineField({
+      name: "paymentDate",
+      title: "Ngày thanh toán",
+      type: "datetime",
+      group: "main",
       readOnly: true,
     }),
     defineField({
@@ -190,7 +196,7 @@ export const orderType = defineType({
     defineField({
       name: "transactionCode",
       title: "Mã giao dịch ngân hàng",
-      type: "number",
+      type: "string",
       group: "admin",
       readOnly: true,
       description: "Mã giao dịch ngân hàng.",

@@ -224,6 +224,7 @@ export type Order = {
   status?: "pending" | "paid" | "shipped" | "cancelled";
   totalPrice?: number;
   orderDate?: string;
+  paymentDate?: string;
   clerkUserId?: string;
   shippingAddress?: {
     fullName?: string;
@@ -258,7 +259,7 @@ export type Order = {
     };
     _key: string;
   }>;
-  transactionCode?: number;
+  transactionCode?: string;
 };
 
 export type Product = {
@@ -541,6 +542,7 @@ export type MY_ORDERS_QUERYResult = Array<{
   status?: "cancelled" | "paid" | "pending" | "shipped";
   totalPrice?: number;
   orderDate?: string;
+  paymentDate?: string;
   clerkUserId?: string;
   shippingAddress: {
     fullName?: string;
@@ -606,7 +608,7 @@ export type MY_ORDERS_QUERYResult = Array<{
     };
     _key: string;
   }> | null;
-  transactionCode?: number;
+  transactionCode?: string;
 }>;
 // Variable: BLOG_BY_SLUG_QUERY
 // Query: *[_type == "blog" && slug.current == $slug] | order(publishedAt desc)[0] {    ...,    author->{      name,      image    },    blogcategories[]->{      title    }  }

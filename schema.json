@@ -1340,6 +1340,13 @@
         },
         "optional": true
       },
+      "paymentDate": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "string"
+        },
+        "optional": true
+      },
       "clerkUserId": {
         "type": "objectAttribute",
         "value": {
@@ -1551,7 +1558,7 @@
       "transactionCode": {
         "type": "objectAttribute",
         "value": {
-          "type": "number"
+          "type": "string"
         },
         "optional": true
       }
