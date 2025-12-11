@@ -2,6 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import payos from "@/lib/payos";
 import { serverWriteClient } from "@/sanity/lib/client";
 
+export const dynamic = "force-dynamic";
+
+export function GET() {
+  return NextResponse.json({ ok: true, message: "PayOS webhook endpoint" });
+}
+
+export function OPTIONS() {
+  return NextResponse.json(null, {
+    status: 200,
+    headers: {
+      Allow: "POST, GET, OPTIONS",
+    },
+  });
+}
+
 // 1. Định nghĩa kiểu dữ liệu Webhook
 type PayOSWebhookData = {
   code: string;
