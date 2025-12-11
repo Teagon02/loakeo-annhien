@@ -65,11 +65,9 @@ export async function POST(req: NextRequest) {
       success: true,
       message: "Webhook processed successfully",
     });
-  } catch (error: any) {
-    console.error("🔥 Lỗi xử lý Webhook:", error);
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    console.error("Lỗi xử lý Webhook:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ success: false, message }, { status: 500 });
   }
 }
