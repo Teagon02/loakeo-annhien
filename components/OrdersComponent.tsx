@@ -72,15 +72,6 @@ const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
                       )}
                     </TableCell>
 
-                    <TableCell className="hidden sm:table-cell">
-                      {order?.payosOrderCode && (
-                        <p className="font-medium line-clamp-1">
-                          {order?.payosOrderCode
-                            ? order?.payosOrderCode
-                            : "----"}
-                        </p>
-                      )}
-                    </TableCell>
                     <TableCell
                       onClick={(event) => {
                         event.stopPropagation();
