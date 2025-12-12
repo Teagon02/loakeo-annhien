@@ -17,6 +17,7 @@ import { toast } from "react-hot-toast";
 import { Minus, Plus, Zap, Eye } from "lucide-react";
 import { Title } from "@/components/ui/text";
 import Link from "next/link";
+import { createCheckoutSession } from "@/actions/createCheckoutSession";
 
 const BuyNowPage = () => {
   const params = useParams();
@@ -100,41 +101,18 @@ const BuyNowPage = () => {
         fullName: `${selectedAddress.fullName} (vãng lai)`,
       };
 
-      const response = await fetch("/api/payos-webhook", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          items: items,
-          totalAmount: calculateTotal(),
-          address: addressWithGuestLabel,
-          userId: null,
-          cancelUrl: `/buy-now/${slug}`,
-        }),
+      const checkout = await createCheckoutSession({
+        items,
+        address: addressWithGuestLabel as Address,
+        userId: null,
+        totalPrice: calculateTotal(),
       });
 
-      let data: { checkoutUrl?: string; error?: string } | null = null;
-      try {
-        data = await response.json();
-      } catch {
-        throw new Error(
-          "Không thể tạo link thanh toán (phản hồi không hợp lệ)."
-        );
+      if (!checkout?.url) {
+        throw new Error("Không thể tạo link thanh toán.");
       }
 
-      if (!response.ok) {
-        throw new Error(
-          data?.error ||
-            `Không thể tạo link thanh toán (mã ${response.status}).`
-        );
-      }
-
-      if (!data?.checkoutUrl) {
-        throw new Error("Không nhận được link thanh toán từ PayOS.");
-      }
-
-      window.location.href = data.checkoutUrl;
+      window.location.href = checkout.url;
     } catch (error) {
       console.error("PayOS checkout error:", error);
       const errorMessage =

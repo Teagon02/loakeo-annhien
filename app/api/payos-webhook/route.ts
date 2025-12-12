@@ -66,6 +66,7 @@ export async function POST(req: NextRequest) {
     const code = webhookData.code || webhookData.data?.code;
     const orderCode = webhookData.orderCode ?? webhookData.data?.orderCode;
     const transactionRef = webhookData.reference ?? webhookData.data?.reference;
+    const transactionDateTime = webhookData.transactionDateTime ?? "";
 
     if (code === "00") {
       if (!orderCode) {
@@ -82,9 +83,12 @@ export async function POST(req: NextRequest) {
         transactionRef
       );
 
-      const query = `*[_type == "order" && orderNumber == $orderCode][0]._id`;
-      const orderId = await serverWriteClient.fetch(query, { orderCode });
-      console.log("[DEBUG] orderId from Sanity:", orderId);
+      const query = `*[_type == "order" && orderNumber == $orderCode][0]{_id, clerkUserId, products}`;
+      const order = await serverWriteClient.fetch(query, { orderCode });
+      console.log("[DEBUG] order from Sanity:", order);
+      const orderId = order?._id;
+      const clerkUserId = order?.clerkUserId;
+      const products = order?.products || [];
 
       if (orderId) {
         await serverWriteClient
@@ -92,13 +96,69 @@ export async function POST(req: NextRequest) {
           .set({
             status: "paid",
             transactionCode: transactionRef,
-            transactionDateTime: webhookData.transactionDateTime,
+            transactionDateTime: transactionDateTime || "",
           })
           .commit();
 
-        console.log(`✅ Đã cập nhật đơn hàng ${orderCode} thành công.`);
+        console.log(`Đã cập nhật đơn hàng ${orderCode} thành công.`);
+
+        // Cập nhật tồn kho cho từng sản phẩm
+        if (products && products.length > 0) {
+          for (const item of products) {
+            const productRef = item?.product?._ref;
+            const quantity = item?.quantity || 0;
+
+            if (productRef && quantity > 0) {
+              try {
+                // Lấy thông tin sản phẩm hiện tại để có stock hiện tại
+                const productQuery = `*[_id == $productId][0]{_id, stock}`;
+                const product = await serverWriteClient.fetch(productQuery, {
+                  productId: productRef,
+                });
+
+                if (product) {
+                  const currentStock = product.stock || 0;
+                  const newStock = Math.max(0, currentStock - quantity); // Đảm bảo không âm
+
+                  await serverWriteClient
+                    .patch(productRef)
+                    .set({ stock: newStock })
+                    .commit();
+
+                  console.log(
+                    `Đã cập nhật tồn kho: Product ${productRef}, ${currentStock} -> ${newStock} (giảm ${quantity})`
+                  );
+                } else {
+                  console.warn(`Không tìm thấy sản phẩm với ID: ${productRef}`);
+                }
+              } catch (error) {
+                console.error(
+                  `Lỗi cập nhật tồn kho cho sản phẩm ${productRef}:`,
+                  error
+                );
+                // Tiếp tục xử lý các sản phẩm khác dù có lỗi
+              }
+            }
+          }
+        }
+
+        // Xoá giỏ hàng sau khi thanh toán thành công (nếu có userId)
+        if (clerkUserId) {
+          const cartIdQuery = `*[_type == "cart" && userId == $userId][0]._id`;
+          const cartId = await serverWriteClient.fetch(cartIdQuery, {
+            userId: clerkUserId,
+          });
+          if (cartId) {
+            await serverWriteClient.delete(cartId);
+            console.log(
+              `Đã xoá giỏ hàng userId=${clerkUserId}, cartId=${cartId}`
+            );
+          } else {
+            console.log(`Không có giỏ hàng cho userId=${clerkUserId} để xoá.`);
+          }
+        }
       } else {
-        console.warn(`⚠️ Không tìm thấy order với orderNumber=${orderCode}.`);
+        console.warn(`Không tìm thấy order với orderNumber=${orderCode}.`);
       }
     }
 
