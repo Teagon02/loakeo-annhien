@@ -7,6 +7,7 @@ import { format } from "date-fns";
 import PriceFormatter from "./PriceFormatter";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
+import sanityLoader from "@/lib/image-loader";
 import { Separator } from "./ui/separator";
 
 type Order = MY_ORDERS_QUERYResult[0];
@@ -129,7 +130,9 @@ const OrderDetailDialog = ({
                           <Image
                             src={urlFor(productImage).url()}
                             alt={productName}
+                            loader={sanityLoader}
                             fill
+                            sizes="80px"
                             className="object-contain"
                           />
                         ) : (

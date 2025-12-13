@@ -3,6 +3,7 @@ import { getBlogBySlug } from "@/sanity/queries";
 import Container from "@/components/Container";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
+import sanityLoader from "@/lib/image-loader";
 import { Calendar, User, ArrowLeft, Tag } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -32,8 +33,10 @@ const PortableTextComponents = {
           <Image
             src={urlFor(value).url()}
             alt={value.alt || "Blog image"}
+            loader={sanityLoader}
             width={800}
             height={600}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 800px"
             className="w-full h-auto rounded-lg"
           />
           {value.alt && (
@@ -163,12 +166,11 @@ const SingleBlogPage = async ({
                 {blog.author.image ? (
                   <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-shop_light_green">
                     <Image
-                      src={urlFor(blog.author.image)
-                        .width(100)
-                        .height(100)
-                        .url()}
+                      src={urlFor(blog.author.image).url()}
                       alt={blog.author.name || "Tác giả"}
+                      loader={sanityLoader}
                       fill
+                      sizes="40px"
                       className="object-cover"
                     />
                   </div>
@@ -198,9 +200,11 @@ const SingleBlogPage = async ({
           {blog.mainImage && (
             <div className="relative w-full h-[400px] md:h-[500px] rounded-lg overflow-hidden mb-8">
               <Image
-                src={urlFor(blog.mainImage).width(1200).height(600).url()}
+                src={urlFor(blog.mainImage).url()}
                 alt={blog.title || "Blog image"}
+                loader={sanityLoader}
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
                 className="object-cover"
                 priority
               />

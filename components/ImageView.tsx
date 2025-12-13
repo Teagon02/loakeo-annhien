@@ -9,6 +9,7 @@ import { AnimatePresence } from "motion/react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
+import sanityLoader from "@/lib/image-loader";
 import { Maximize2, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Props {
@@ -111,8 +112,10 @@ const ImageView = ({ images = [], isStock = undefined }: Props) => {
             <Image
               src={urlFor(active).url()}
               alt="Ảnh sản phẩm"
+              loader={sanityLoader}
               width={700}
               height={700}
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
               priority
               className={`w-full h-96 max-h-[550px] min-h-[500px] object-contain group-hover:scale-110 hoverEffect rounded-md ${isStock === 0 ? "opacity-50" : ""}`}
             />
@@ -142,8 +145,10 @@ const ImageView = ({ images = [], isStock = undefined }: Props) => {
               <Image
                 src={urlFor(image).url()}
                 alt={`Ảnh sản phẩm ${image?._key}`}
+                loader={sanityLoader}
                 width={100}
                 height={100}
+                sizes="100px"
                 className="w-full h-auto object-contain"
               />
               {active?._key === image?._key ? (
@@ -223,8 +228,11 @@ const ImageView = ({ images = [], isStock = undefined }: Props) => {
               <Image
                 src={urlFor(currentFullscreenImage).url()}
                 alt="Ảnh sản phẩm full màn hình"
+                loader={sanityLoader}
                 width={1200}
                 height={1200}
+                sizes="100vw"
+                quality={90}
                 className="max-w-full max-h-full object-contain"
                 priority
               />

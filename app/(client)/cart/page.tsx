@@ -12,6 +12,7 @@ import { Title } from "@/components/ui/text";
 import Link from "next/link";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
+import sanityLoader from "@/lib/image-loader";
 import {
   TooltipProvider,
   Tooltip,
@@ -144,8 +145,10 @@ const CartPage = () => {
                     <Image
                       src={urlFor(product?.images[0]).url()}
                       alt="Ảnh sản phẩm"
+                      loader={sanityLoader}
                       width={500}
                       height={500}
+                      sizes="(max-width: 768px) 128px, 160px"
                       loading="lazy"
                       className="w-32 md:w-40 h-32 md:h-40 object-cover rounded-md group-hover:scale-105 hoverEffect"
                     />
@@ -213,7 +216,23 @@ const CartPage = () => {
                   amount={(product?.price as number) * itemCount}
                   className="text-lg font-semibold"
                 />
-                <QuantityButtons product={product} />
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5 text-xs">
+                    <span className="text-gray-500 font-semibold">Kho:</span>
+                    <span
+                      className={`font-semibold ${
+                        (product?.stock as number) === 0
+                          ? "text-red-600"
+                          : "text-shop_light_green"
+                      }`}
+                    >
+                      {(product?.stock as number) > 0
+                        ? product?.stock
+                        : "Hết hàng"}
+                    </span>
+                  </div>
+                  <QuantityButtons product={product} />
+                </div>
               </div>
             </div>
           );

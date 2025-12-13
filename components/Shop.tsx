@@ -7,9 +7,17 @@ import CategoryList from "./shop/CategoryList";
 import PriceList from "./shop/PriceList";
 import { useSearchParams } from "next/navigation";
 import { client } from "@/sanity/lib/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Filter } from "lucide-react";
 import NoProductAvailable from "./NoProductAvailable";
 import ProductCard from "./ProductCard";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
+import { Button } from "./ui/button";
 
 interface Props {
   categories: Category[];
@@ -23,6 +31,29 @@ const Shop = ({ categories }: Props) => {
     categoryParams || null
   );
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  // State tạm thời cho filter trong dialog
+  const [tempSelectedCategory, setTempSelectedCategory] = useState<
+    string | null
+  >(null);
+  const [tempSelectedPrice, setTempSelectedPrice] = useState<string | null>(
+    null
+  );
+
+  // Khởi tạo temp state khi mở dialog
+  useEffect(() => {
+    if (isFilterOpen) {
+      setTempSelectedCategory(selectedCategory);
+      setTempSelectedPrice(selectedPrice);
+    }
+  }, [isFilterOpen, selectedCategory, selectedPrice]);
+
+  const handleApplyFilter = () => {
+    setSelectedCategory(tempSelectedCategory);
+    setSelectedPrice(tempSelectedPrice);
+    setIsFilterOpen(false);
+  };
+
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
@@ -64,34 +95,73 @@ const Shop = ({ categories }: Props) => {
   }, [fetchProducts]);
 
   return (
-    <div className="border-t">
+    <div>
       <Container className="mt-5">
         {/* Filter tiêu đề & Reset */}
-        <div className="sticky top-0 z-10 mb-5">
-          <div className="flex items-center justify-between">
+        <div className="sticky top-0 z-10">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 border py-5 px-2 rounded-lg bg-white">
             {/* Tiêu đề */}
             <Title className="text-lg uppercase tracking-wide">
               Chọn sản phẩm theo nhu cầu của bạn
             </Title>
-
-            {/* Reset tất cả */}
-            {(selectedCategory !== null || selectedPrice !== null) && (
-              <button
-                onClick={() => {
-                  setSelectedCategory(null);
-                  setSelectedPrice(null);
-                }}
-                className="text-shop_dark_green underline underline-offset-2 text-sm mt-2 font-medium hover:text-shop_orange hoverEffect"
-              >
-                Reset tất cả
-              </button>
-            )}
           </div>
         </div>
+        <div className="flex items-center gap-2 py-2">
+          {/* Nút Lọc - chỉ hiển thị trên mobile */}
+          <Dialog open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <DialogTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="md:hidden flex items-center gap-2"
+              >
+                <Filter className="w-4 h-4" />
+                Lọc
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md max-h-[85vh] flex flex-col">
+              <DialogHeader>
+                <DialogTitle>Lọc sản phẩm</DialogTitle>
+              </DialogHeader>
+              <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+                <CategoryList
+                  categories={categories}
+                  selectedCategory={tempSelectedCategory}
+                  setSelectedCategory={setTempSelectedCategory}
+                />
+                <PriceList
+                  selectedPrice={tempSelectedPrice}
+                  setSelectedPrice={setTempSelectedPrice}
+                />
+              </div>
+              <div className="flex gap-2 pt-4 border-t mt-4">
+                <Button
+                  onClick={handleApplyFilter}
+                  className="flex-1 bg-shop_dark_green hover:bg-shop_light_green"
+                >
+                  Áp dụng
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
 
-        {/* Filter danh mục */}
+          {/* Reset tất cả */}
+          {(selectedCategory !== null || selectedPrice !== null) && (
+            <button
+              onClick={() => {
+                setSelectedCategory(null);
+                setSelectedPrice(null);
+              }}
+              className="text-shop_dark_green underline-offset-2 text-sm font-bold hover:bg-red-500/30 border border-red-500 py-2 px-2 rounded-lg bg-red-500/10 hoverEffect w-36 md:w-auto"
+            >
+              Reset tất cả
+            </button>
+          )}
+        </div>
+
+        {/* Filter danh mục - Ẩn trên mobile, hiển thị trong dialog */}
         <div className="flex flex-col md:flex-row gap-5 border-t border-t-shop_dark_green/50">
-          <div className="md:sticky md:top-20 md:self-start md:h-[calc(100vh-160px)] md:overflow-y-auto md:min-w-64 pb-5 md:border-r border-r-shop_dark_green/50 scrollbar-hide">
+          <div className="hidden md:block md:sticky md:top-20 md:self-start md:h-[calc(100vh-160px)] md:overflow-y-auto md:min-w-64 pb-5 md:border-r border-r-shop_dark_green/50 scrollbar-hide">
             {/* Danh sách danh mục */}
             <CategoryList
               categories={categories}

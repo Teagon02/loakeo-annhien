@@ -4,6 +4,7 @@ import { Title } from "@/components/ui/text";
 import { getPaginatedBlogs } from "@/sanity/queries";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
+import sanityLoader from "@/lib/image-loader";
 import Link from "next/link";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import dayjs from "dayjs";
@@ -51,9 +52,11 @@ const BlogPage = async ({ searchParams }: BlogPageProps) => {
                 <Link href={`/blog/${blog.slug?.current}`}>
                   <div className="relative w-full h-64 overflow-hidden bg-shop_light_bg">
                     <Image
-                      src={urlFor(blog.mainImage).width(600).height(400).url()}
+                      src={urlFor(blog.mainImage).url()}
                       alt={blog.title || "Ảnh blog"}
+                      loader={sanityLoader}
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover group-hover:scale-110 transition-transform duration-300"
                     />
                   </div>

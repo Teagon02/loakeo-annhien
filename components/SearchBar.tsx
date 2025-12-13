@@ -15,6 +15,7 @@ import { client } from "@/sanity/lib/client";
 import { Product } from "@/sanity.types";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
+import sanityLoader from "@/lib/image-loader";
 import Link from "next/link";
 import PriceView from "./PriceView";
 
@@ -110,14 +111,37 @@ const SearchBar = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button
-          className="cursor-pointer hover:text-shop_light_green transition-colors"
-          aria-label="Tìm kiếm sản phẩm"
-        >
-          <Search className="w-5 h-5 hover:text-shop_light_green hoverEffect" />
-        </button>
-      </DialogTrigger>
+      {/* Input search bar - Desktop & Mobile */}
+      <div className="relative flex-1 max-w-md mx-2 md:mx-4 group">
+        <div className="relative flex items-center">
+          <Search className="absolute left-3 w-4 h-4 text-gray-400 pointer-events-none group-hover:text-shop_light_green transition-colors" />
+          <Input
+            type="text"
+            placeholder="Tìm kiếm sản phẩm..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            onFocus={() => setOpen(true)}
+            className="w-full pl-10 pr-10 h-9 text-sm border-gray-300 hover:border-shop_light_green focus-visible:ring-1 focus-visible:ring-shop_light_green transition-colors hoverEffect"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => {
+                setSearchTerm("");
+                setProducts([]);
+              }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+              aria-label="Xóa tìm kiếm"
+            >
+              <X className="w-4 h-4 text-gray-400" />
+            </button>
+          )}
+          {loading && !searchTerm && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2">
+              <Loader2 className="w-4 h-4 text-shop_light_green animate-spin" />
+            </div>
+          )}
+        </div>
+      </div>
       <DialogContent className="max-w-2xl w-[calc(100%-2rem)] p-0 gap-0 max-h-[85vh] flex flex-col">
         <DialogHeader className="sr-only">
           <DialogTitle>Tìm kiếm sản phẩm</DialogTitle>
@@ -186,7 +210,9 @@ const SearchBar = () => {
                             <Image
                               src={urlFor(product.images[0]).url()}
                               alt={product.name || "Sản phẩm"}
+                              loader={sanityLoader}
                               fill
+                              sizes="(max-width: 768px) 64px, 80px"
                               className="object-contain group-hover:scale-105 transition-transform duration-200"
                             />
                           </div>
@@ -274,7 +300,9 @@ const SearchBar = () => {
                           <Image
                             src={urlFor(product.images[0]).url()}
                             alt={product.name || "Sản phẩm"}
+                            loader={sanityLoader}
                             fill
+                            sizes="(max-width: 768px) 64px, 80px"
                             className="object-contain group-hover:scale-105 transition-transform duration-200"
                           />
                         </div>

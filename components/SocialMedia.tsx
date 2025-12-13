@@ -11,6 +11,7 @@ import {
 import { HiMiniUserGroup } from "react-icons/hi2";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { BsFacebook } from "react-icons/bs";
 
 interface Props {
   className?: string;
@@ -37,6 +38,11 @@ const socialLink = [
     title: "Nhóm Facebook",
     href: "https://www.facebook.com/groups/335792308542117",
     icon: <HiMiniUserGroup className="w-5 h-5" />,
+  },
+  {
+    title: "Trang facebook",
+    href: "https://www.facebook.com/loakeoannhien/",
+    icon: <BsFacebook className="w-5 h-5" />,
   },
 ];
 
