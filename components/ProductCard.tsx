@@ -3,7 +3,6 @@ import React from "react";
 import { Product } from "@/sanity.types";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
-import sanityLoader from "@/lib/image-loader";
 import Link from "next/link";
 import { Flame, StarIcon, ShoppingCart } from "lucide-react";
 import AddToWishList from "./AddToWishList";
@@ -36,13 +35,13 @@ const ProductCard = ({ product }: { product: Product }) => {
         {product?.images && (
           <Link href={`/product/${product?.slug?.current}`}>
             <Image
-              src={urlFor(product?.images[0]).url()}
+              src={urlFor(product?.images[0]).width(1400).quality(85).format('webp').url()}
               alt="Ảnh sản phẩm"
-              loader={sanityLoader}
               priority
               width={700}
               height={700}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              unoptimized
               className={`w-full h-64 object-contain overflow-hidden transition-transform bg-shop_light_bg hoverEffect  ${product?.stock !== 0 ? "group-hover:scale-105" : "group-hover:scale-105"}`}
             />
           </Link>

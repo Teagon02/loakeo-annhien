@@ -6,7 +6,6 @@ import { Product } from "@/sanity.types";
 import Container from "@/components/Container";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
-import sanityLoader from "@/lib/image-loader";
 import PriceFormatter from "@/components/PriceFormatter";
 import PriceView from "@/components/PriceView";
 import GuestAddressForm from "@/components/GuestAddressForm";
@@ -169,12 +168,12 @@ const BuyNowPage = () => {
                   {product.images && product.images.length > 0 && (
                     <div className="w-full md:w-48 h-48 border rounded-md overflow-hidden">
                       <Image
-                        src={urlFor(product.images[0]).url()}
+                        src={urlFor(product.images[0]).width(384).quality(85).format('webp').url()}
                         alt={product.name || "Sản phẩm"}
-                        loader={sanityLoader}
                         width={200}
                         height={200}
                         sizes="(max-width: 768px) 100vw, 192px"
+                        unoptimized
                         className="w-full h-full object-cover"
                       />
                     </div>

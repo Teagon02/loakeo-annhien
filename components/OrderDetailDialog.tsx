@@ -7,7 +7,6 @@ import { format } from "date-fns";
 import PriceFormatter from "./PriceFormatter";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
-import sanityLoader from "@/lib/image-loader";
 import { Separator } from "./ui/separator";
 
 type Order = MY_ORDERS_QUERYResult[0];
@@ -128,11 +127,11 @@ const OrderDetailDialog = ({
                       <div className="relative w-20 h-20 shrink-0 rounded-md overflow-hidden bg-shop_light_bg flex items-center justify-center">
                         {productImage ? (
                           <Image
-                            src={urlFor(productImage).url()}
+                            src={urlFor(productImage).width(160).quality(85).format('webp').url()}
                             alt={productName}
-                            loader={sanityLoader}
                             fill
                             sizes="80px"
+                            unoptimized
                             className="object-contain"
                           />
                         ) : (

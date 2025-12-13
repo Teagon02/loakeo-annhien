@@ -3,7 +3,6 @@ import { Title } from "./ui/text";
 import { getLatestBlogs } from "@/sanity/queries";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
-import sanityLoader from "@/lib/image-loader";
 import Link from "next/link";
 import { Calendar } from "lucide-react";
 import dayjs from "dayjs";
@@ -30,12 +29,12 @@ const LatestBlog = async () => {
               // hiển thị ảnh blog
               <Link href={`/blog/${blog?.slug?.current}`}>
                 <Image
-                  src={urlFor(blog?.mainImage).url()}
+                  src={urlFor(blog?.mainImage).width(1000).quality(85).format('webp').url()}
                   alt="Ảnh blog"
-                  loader={sanityLoader}
                   width={500}
                   height={500}
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  unoptimized
                   className="w-full max-h-80 object-cover"
                 />
               </Link>

@@ -8,7 +8,6 @@ import Link from "next/link";
 import { Product } from "@/sanity.types";
 import { toast } from "react-hot-toast";
 import { urlFor } from "@/sanity/lib/image";
-import sanityLoader from "@/lib/image-loader";
 import Image from "next/image";
 import PriceFormatter from "./PriceFormatter";
 import AddToCartButton from "./AddToCartButton";
@@ -72,12 +71,12 @@ const WishListProducts = () => {
                             onClick={(e) => e.stopPropagation()}
                           >
                             <Image
-                              src={urlFor(product?.images[0]).url()}
+                              src={urlFor(product?.images[0]).width(160).quality(85).format('webp').url()}
                               alt="Ảnh sản phẩm"
-                              loader={sanityLoader}
                               width={80}
                               height={80}
                               sizes="(max-width: 640px) 64px, 80px"
+                              unoptimized
                               className="rounded-md group-hover:scale-105 hoverEffect h-16 w-16 sm:h-20 sm:w-20 object-contain"
                             />
                           </Link>

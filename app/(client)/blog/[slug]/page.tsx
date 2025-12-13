@@ -3,7 +3,6 @@ import { getBlogBySlug } from "@/sanity/queries";
 import Container from "@/components/Container";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
-import sanityLoader from "@/lib/image-loader";
 import { Calendar, User, ArrowLeft, Tag } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -31,12 +30,12 @@ const PortableTextComponents = {
       return (
         <div className="my-8">
           <Image
-            src={urlFor(value).url()}
+            src={urlFor(value).width(1600).quality(85).format('webp').url()}
             alt={value.alt || "Blog image"}
-            loader={sanityLoader}
             width={800}
             height={600}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 800px"
+            unoptimized
             className="w-full h-auto rounded-lg"
           />
           {value.alt && (
@@ -166,11 +165,11 @@ const SingleBlogPage = async ({
                 {blog.author.image ? (
                   <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-shop_light_green">
                     <Image
-                      src={urlFor(blog.author.image).url()}
+                      src={urlFor(blog.author.image).width(80).quality(85).format('webp').url()}
                       alt={blog.author.name || "Tác giả"}
-                      loader={sanityLoader}
                       fill
                       sizes="40px"
+                      unoptimized
                       className="object-cover"
                     />
                   </div>
@@ -200,11 +199,11 @@ const SingleBlogPage = async ({
           {blog.mainImage && (
             <div className="relative w-full h-[400px] md:h-[500px] rounded-lg overflow-hidden mb-8">
               <Image
-                src={urlFor(blog.mainImage).url()}
+                src={urlFor(blog.mainImage).width(1920).quality(85).format('webp').url()}
                 alt={blog.title || "Blog image"}
-                loader={sanityLoader}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+                unoptimized
                 className="object-cover"
                 priority
               />

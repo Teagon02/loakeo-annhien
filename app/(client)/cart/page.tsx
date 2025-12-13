@@ -12,7 +12,6 @@ import { Title } from "@/components/ui/text";
 import Link from "next/link";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
-import sanityLoader from "@/lib/image-loader";
 import {
   TooltipProvider,
   Tooltip,
@@ -143,13 +142,13 @@ const CartPage = () => {
                     className="border p-0.5 md:p-1 mr-2 rounded-md overflow-hidden group"
                   >
                     <Image
-                      src={urlFor(product?.images[0]).url()}
+                      src={urlFor(product?.images[0]).width(320).quality(85).format('webp').url()}
                       alt="Ảnh sản phẩm"
-                      loader={sanityLoader}
                       width={500}
                       height={500}
                       sizes="(max-width: 768px) 128px, 160px"
                       loading="lazy"
+                      unoptimized
                       className="w-32 md:w-40 h-32 md:h-40 object-cover rounded-md group-hover:scale-105 hoverEffect"
                     />
                   </Link>

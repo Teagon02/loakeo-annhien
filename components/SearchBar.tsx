@@ -15,7 +15,6 @@ import { client } from "@/sanity/lib/client";
 import { Product } from "@/sanity.types";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
-import sanityLoader from "@/lib/image-loader";
 import Link from "next/link";
 import PriceView from "./PriceView";
 
@@ -208,11 +207,11 @@ const SearchBar = () => {
                         {product.images && product.images[0] && (
                           <div className="relative w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-md overflow-hidden bg-shop_light_bg">
                             <Image
-                              src={urlFor(product.images[0]).url()}
+                              src={urlFor(product.images[0]).width(160).quality(85).format('webp').url()}
                               alt={product.name || "Sản phẩm"}
-                              loader={sanityLoader}
                               fill
                               sizes="(max-width: 768px) 64px, 80px"
+                              unoptimized
                               className="object-contain group-hover:scale-105 transition-transform duration-200"
                             />
                           </div>
@@ -298,11 +297,11 @@ const SearchBar = () => {
                       {product.images && product.images[0] && (
                         <div className="relative w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-md overflow-hidden bg-shop_light_bg">
                           <Image
-                            src={urlFor(product.images[0]).url()}
+                            src={urlFor(product.images[0]).width(160).quality(85).format('webp').url()}
                             alt={product.name || "Sản phẩm"}
-                            loader={sanityLoader}
                             fill
                             sizes="(max-width: 768px) 64px, 80px"
+                            unoptimized
                             className="object-contain group-hover:scale-105 transition-transform duration-200"
                           />
                         </div>

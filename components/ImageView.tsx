@@ -9,7 +9,6 @@ import { AnimatePresence } from "motion/react";
 import { motion } from "motion/react";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
-import sanityLoader from "@/lib/image-loader";
 import { Maximize2, X, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Props {
@@ -110,13 +109,13 @@ const ImageView = ({ images = [], isStock = undefined }: Props) => {
             className="w-full max-h-[550px] min-h-[400px] border border-darkColor/10 rounded-md group overflow-hidden relative"
           >
             <Image
-              src={urlFor(active).url()}
+              src={urlFor(active).width(1400).quality(85).format("webp").url()}
               alt="Ảnh sản phẩm"
-              loader={sanityLoader}
               width={700}
               height={700}
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 40vw"
               priority
+              unoptimized
               className={`w-full h-96 max-h-[550px] min-h-[500px] object-contain group-hover:scale-110 hoverEffect rounded-md ${isStock === 0 ? "opacity-50" : ""}`}
             />
             <button
@@ -143,12 +142,12 @@ const ImageView = ({ images = [], isStock = undefined }: Props) => {
               className={`border rounded-md overflow-hidden relative group/thumb ${active?._key === image?._key ? " border-darkColor opacity-100" : "opacity-70"}`}
             >
               <Image
-                src={urlFor(image).url()}
+                src={urlFor(image).width(200).quality(85).format("webp").url()}
                 alt={`Ảnh sản phẩm ${image?._key}`}
-                loader={sanityLoader}
                 width={100}
                 height={100}
                 sizes="100px"
+                unoptimized
                 className="w-full h-auto object-contain"
               />
               {active?._key === image?._key ? (
@@ -226,13 +225,16 @@ const ImageView = ({ images = [], isStock = undefined }: Props) => {
               onClick={(e) => e.stopPropagation()}
             >
               <Image
-                src={urlFor(currentFullscreenImage).url()}
+                src={urlFor(currentFullscreenImage)
+                  .width(1920)
+                  .quality(90)
+                  .format("webp")
+                  .url()}
                 alt="Ảnh sản phẩm full màn hình"
-                loader={sanityLoader}
                 width={1200}
                 height={1200}
                 sizes="100vw"
-                quality={90}
+                unoptimized
                 className="max-w-full max-h-full object-contain"
                 priority
               />

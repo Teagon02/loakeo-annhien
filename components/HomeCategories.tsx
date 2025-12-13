@@ -3,7 +3,6 @@ import { Title } from "./ui/text";
 import { Category } from "@/sanity.types";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
-import sanityLoader from "@/lib/image-loader";
 import Link from "next/link";
 
 // Type for category with productCount from query
@@ -68,12 +67,12 @@ const HomeCategories = ({
                   }}
                 >
                   <Image
-                    src={urlFor(category?.image).url()}
+                    src={urlFor(category?.image).width(1000).quality(85).format('webp').url()}
                     alt="Ảnh danh mục"
-                    loader={sanityLoader}
                     width={500}
                     height={500}
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    unoptimized
                     className="w-full h-full object-contain group-hover:scale-110 hoverEffect"
                   />
                 </Link>

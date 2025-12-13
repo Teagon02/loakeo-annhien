@@ -25,3 +25,22 @@ export const urlForOptimized = (
   
   return imageBuilder.quality(quality);
 }
+
+// Helper function để build URL với width, quality và format WebP
+// Sử dụng thay vì loader prop trong Client Components
+export const urlForWithParams = (
+  source: SanityImageSource,
+  width: number,
+  quality: number = 85
+) => {
+  // Giới hạn maxWidth để tránh ảnh quá lớn
+  const absoluteMaxWidth = 1920;
+  const optimizedWidth = Math.min(width, absoluteMaxWidth);
+  
+  return builder
+    .image(source)
+    .width(optimizedWidth)
+    .quality(quality)
+    .format('webp')
+    .url();
+}
