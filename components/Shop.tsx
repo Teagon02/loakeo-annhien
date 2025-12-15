@@ -98,13 +98,11 @@ const Shop = ({ categories }: Props) => {
     <div>
       <Container className="mt-5">
         {/* Filter tiêu đề & Reset */}
-        <div className="sticky top-0 z-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 border py-5 px-2 rounded-lg bg-white">
-            {/* Tiêu đề */}
-            <Title className="text-lg uppercase tracking-wide">
-              Chọn sản phẩm theo nhu cầu của bạn
-            </Title>
-          </div>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 border py-5 px-2 rounded-lg bg-white">
+          {/* Tiêu đề */}
+          <Title className="text-lg uppercase tracking-wide">
+            Chọn sản phẩm theo nhu cầu của bạn
+          </Title>
         </div>
         <div className="flex items-center gap-2 py-2">
           {/* Nút Lọc - chỉ hiển thị trên mobile */}

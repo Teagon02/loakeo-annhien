@@ -16,8 +16,10 @@ const Home = async () => {
   console.log(categories);
   return (
     <Container className="bg-shop-light-pink">
-      <HomeBanner />
-      <div className="py-10">
+      <div className="pt-2">
+        <HomeBanner />
+      </div>
+      <div className="py-5">
         <ProductGrid />
         <HomeCategories categories={categories} />
         <LatestBlog />
