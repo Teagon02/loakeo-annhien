@@ -89,7 +89,7 @@ const SingleProductPage = async ({
               />
               {product?.discount ? (
                 <span className="text-xs font-semibold text-shop_orange border border-shop_orange/60 px-2 py-0.5 rounded-full shrink-0">
-                  Giảm giá -{product.discount}%
+                  Giảm -{product.discount}%
                 </span>
               ) : null}
             </div>

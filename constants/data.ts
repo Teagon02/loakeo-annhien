@@ -18,15 +18,18 @@ export const quickLinksData = [
   },
   {
     title: "Điều khoản",
-    href: "/dieu-khoan",
+    // href: "/dieu-khoan",
+    href: "#",
   },
   {
     title: "Chính sách",
-    href: "/chinh-sach",
+    // href: "/chinh-sach",
+    href: "#",
   },
   {
     title: "Câu hỏi thường gặp",
-    href: "/cau-hoi-thuong-gap",
+    // href: "/cau-hoi-thuong-gap",
+    href: "#",
   },
 ];
 
