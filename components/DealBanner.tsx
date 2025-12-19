@@ -1,313 +1,143 @@
 "use client";
 
-import React from "react";
-import Link from "next/link";
-import { motion } from "motion/react";
-import { Sparkles, Gift, Percent, ArrowRight, Zap } from "lucide-react";
-import { Button } from "./ui/button";
+import React, { useState, useEffect } from "react";
+import { Clock } from "lucide-react";
+import Logo from "./Logo";
 
-const DealBanner = () => {
-  // Animated confetti particles
-  const ConfettiParticle = ({
-    delay = 0,
-    x = 0,
-    y = 0,
-    color = "#ffffff",
-  }: {
-    delay?: number;
-    x?: number;
-    y?: number;
-    color?: string;
-  }) => (
-    <motion.div
-      className="absolute w-2 h-2 rounded-full"
-      style={{
-        left: `${x}%`,
-        top: `${y}%`,
-        backgroundColor: color,
-        boxShadow: `0 0 10px ${color}`,
-      }}
-      initial={{ opacity: 0, y: -20, scale: 0 }}
-      animate={{
-        opacity: [0, 1, 1, 0],
-        y: [0, 100],
-        x: [0, Math.random() * 40 - 20],
-        scale: [0, 1, 1, 0],
-        rotate: [0, 360],
-      }}
-      transition={{
-        duration: 3,
-        repeat: Infinity,
-        delay,
-        ease: "easeOut",
-      }}
-    />
-  );
+interface CountdownTimerProps {
+  targetDate: Date;
+}
 
-  // Floating snowflakes
-  const SnowFlake = ({ delay = 0, x = 0 }: { delay?: number; x?: number }) => (
-    <motion.div
-      className="absolute text-4xl"
-      style={{ left: `${x}%`, top: "10%" }}
-      animate={{
-        y: [0, -30, 0],
-        rotate: [0, 5, -5, 0],
-      }}
-      transition={{
-        duration: 4,
-        repeat: Infinity,
-        delay,
-        ease: "easeInOut",
-      }}
-    >
-      ❄️
-    </motion.div>
-  );
+const CountdownTimer = ({ targetDate }: CountdownTimerProps) => {
+  const [timeLeft, setTimeLeft] = useState({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
 
-  // Ornament animation
-  const Ornament = ({ delay = 0, x = 0 }: { delay?: number; x?: number }) => (
-    <motion.div
-      className="absolute text-3xl"
-      style={{ left: `${x}%`, top: "5%" }}
-      animate={{
-        scale: [1, 1.3, 1],
-        rotate: [0, 10, -10, 0],
-      }}
-      transition={{
-        duration: 2,
-        repeat: Infinity,
-        delay,
-        ease: "easeInOut",
-      }}
-    >
-      🎁
-    </motion.div>
-  );
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date().getTime();
+      const target = targetDate.getTime();
+      const difference = target - now;
+
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor(
+            (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+          ),
+          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
+          seconds: Math.floor((difference % (1000 * 60)) / 1000),
+        });
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      }
+    };
+
+    calculateTimeLeft();
+    const interval = setInterval(calculateTimeLeft, 1000);
+
+    return () => clearInterval(interval);
+  }, [targetDate]);
+
+  const timeUnits = [
+    { label: "Ngày", value: timeLeft.days },
+    { label: "Giờ", value: timeLeft.hours },
+    { label: "Phút", value: timeLeft.minutes },
+    { label: "Giây", value: timeLeft.seconds },
+  ];
 
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl md:rounded-3xl">
-      {/* Animated gradient background */}
-      <motion.div
-        className="absolute inset-0"
-        animate={{
-          background: [
-            "linear-gradient(135deg, #0f2f3d 0%, #9c1b2d 50%, #0f2f3d 100%)",
-            "linear-gradient(135deg, #9c1b2d 0%, #0f2f3d 50%, #9c1b2d 100%)",
-            "linear-gradient(135deg, #0f2f3d 0%, #9c1b2d 50%, #0f2f3d 100%)",
-          ],
-        }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-      />
+    <div className="flex items-center gap-3 sm:gap-4">
+      <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-shop_dark_green" />
+      <div className="flex items-center gap-2 sm:gap-3">
+        {timeUnits.map((unit, index) => (
+          <div key={index} className="flex flex-col items-center">
+            <div className="bg-white rounded-lg px-3 py-2 sm:px-4 sm:py-3 shadow-md min-w-[50px] sm:min-w-[60px]">
+              <span className="text-xl sm:text-2xl md:text-3xl font-bold text-shop_dark_green">
+                {String(unit.value).padStart(2, "0")}
+              </span>
+            </div>
+            <span className="text-xs sm:text-sm text-shop_light_text mt-1 font-medium">
+              {unit.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
 
-      {/* Animated overlay pattern */}
-      <motion.div
-        className="absolute inset-0 opacity-20"
-        style={{
-          backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.3) 1px, transparent 0)`,
-          backgroundSize: "40px 40px",
-        }}
-        animate={{
-          x: [0, 40],
-          y: [0, 40],
-        }}
-        transition={{
-          duration: 20,
-          repeat: Infinity,
-          ease: "linear",
-        }}
-      />
+const DealBanner = () => {
+  // Đặt thời gian kết thúc deal (ví dụ: 7 ngày từ bây giờ)
+  const targetDate = new Date();
+  targetDate.setDate(targetDate.getDate() + 12);
+  targetDate.setHours(23, 59, 59, 999);
 
-      {/* Confetti particles */}
-      {Array.from({ length: 20 }).map((_, i) => (
-        <ConfettiParticle
-          key={i}
-          delay={i * 0.2}
-          x={Math.random() * 100}
-          y={-10}
-          color={i % 3 === 0 ? "#ffffff" : i % 3 === 1 ? "#d5e8ff" : "#9bd5ff"}
+  return (
+    <div className="relative w-full bg-yellow-200/80 min-h-[320px] md:min-h-[400px] lg:min-h-[480px] overflow-hidden rounded-lg md:rounded-xl lg:rounded-2xl">
+      {/* Background with subtle pattern */}
+      <div className="absolute inset-0 opacity-5">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, #000 1px, transparent 0)`,
+            backgroundSize: "40px 40px",
+          }}
         />
-      ))}
-
-      {/* Floating decorations */}
-      <SnowFlake delay={0} x={5} />
-      <SnowFlake delay={1} x={90} />
-      <Ornament delay={0.5} x={15} />
-      <Ornament delay={1.5} x={85} />
-
-      {/* Content */}
-      <div className="relative z-10 px-6 py-8 md:px-12 md:py-16 lg:px-16 lg:py-20">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-          {/* Left content */}
-          <motion.div
-            className="flex-1 text-center md:text-left"
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/15 backdrop-blur-md rounded-full border border-white/30 shadow-lg mb-4"
-            >
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              >
-                <Sparkles className="w-4 h-4 text-amber-200" />
-              </motion.div>
-              <span className="text-sm font-bold text-white">
-                🎄 Noel • Loa Kéo An Nhiên 🎁
-              </span>
-            </motion.div>
-
-            {/* Main title */}
-            <motion.h2
-              className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white mb-4 leading-tight"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-            >
-              <span className="block text-white/80">
-                Không khí Giáng Sinh rộn ràng
-              </span>
-              <motion.span
-                className="block mt-2 text-amber-100 drop-shadow-lg"
-                animate={{
-                  scale: [1, 1.05, 1],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                Loa Kéo An Nhiên
-              </motion.span>
-              <motion.span
-                className="block mt-2 text-5xl md:text-6xl lg:text-7xl font-black text-amber-50 drop-shadow-2xl"
-                animate={{
-                  scale: [1, 1.08, 1],
-                  textShadow: [
-                    "0 0 18px rgba(255,255,255,0.25)",
-                    "0 0 28px rgba(156,27,45,0.55)",
-                    "0 0 18px rgba(255,255,255,0.25)",
-                  ],
-                }}
-                transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                Sale Noel đến 50%
-              </motion.span>
-            </motion.h2>
-
-            {/* Subtitle */}
-            <motion.p
-              className="text-lg md:text-xl text-white/90 mb-6 font-semibold"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.5 }}
-            >
-              Mừng giáng sinh với ưu đãi đặc biệt tết tết.
-            </motion.p>
-
-            {/* Features */}
-            <motion.div
-              className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.6 }}
-            >
-              {[
-                { icon: Gift, text: "Mừng giáng sinh" },
-                { icon: Percent, text: "Giảm giá sâu" },
-                { icon: Zap, text: "Giao hàng nhanh" },
-              ].map((item, idx) => (
-                <motion.div
-                  key={idx}
-                  className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full border border-white/30"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: 0.7 + idx * 0.1 }}
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <item.icon className="w-4 h-4 text-amber-200" />
-                  <span className="text-sm font-semibold text-white">
-                    {item.text}
-                  </span>
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-
-          {/* Right decorative elements */}
-          <motion.div
-            className="hidden md:flex flex-col items-center gap-4"
-            initial={{ opacity: 0, scale: 0.8, rotate: -10 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            {/* Large decorative text */}
-            <motion.div
-              className="text-8xl md:text-9xl font-black text-white/25 select-none"
-              animate={{
-                rotate: [0, 5, -5, 0],
-                scale: [1, 1.05, 1],
-              }}
-              transition={{
-                duration: 4,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-            >
-              🎄
-            </motion.div>
-            <motion.div
-              className="text-6xl md:text-7xl font-black text-white/25 select-none"
-              animate={{
-                rotate: [0, -5, 5, 0],
-                scale: [1, 1.05, 1],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.5,
-              }}
-            >
-              ❄️
-            </motion.div>
-          </motion.div>
-        </div>
       </div>
 
-      {/* Bottom wave decoration */}
-      <motion.div
-        className="absolute bottom-0 left-0 right-0 h-16 bg-white/10"
-        style={{
-          clipPath: "polygon(0 50%, 100% 0%, 100% 100%, 0% 100%)",
-        }}
-        animate={{
-          clipPath: [
-            "polygon(0 50%, 100% 0%, 100% 100%, 0% 100%)",
-            "polygon(0 40%, 100% 10%, 100% 100%, 0% 100%)",
-            "polygon(0 50%, 100% 0%, 100% 100%, 0% 100%)",
-          ],
-        }}
-        transition={{
-          duration: 5,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
+      {/* Content */}
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 h-full overflow-visible">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 h-full min-h-[320px] md:min-h-[400px] lg:min-h-[480px] py-6 md:py-8 lg:py-10 overflow-visible">
+          {/* Left Section - Deal Info */}
+          <div className="flex flex-col items-center lg:items-start gap-6 lg:gap-8 flex-1 text-center lg:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 rounded-full border border-red-200">
+              <span className="text-sm font-bold text-red-600">
+                KHUYẾN MÃI ĐẶC BIỆT
+              </span>
+            </div>
+
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-shop_dark_green leading-tight">
+              Giảm giá <span className="text-red-600">lên đến 50%</span>
+            </h1>
+            <p className="text-base sm:text-lg md:text-xl text-shop_light_text max-w-lg">
+              Ưu đãi đặc biệt cho các sản phẩm loa kéo chất lượng cao. Nhanh tay
+              đặt hàng để nhận được giá tốt nhất!
+            </p>
+
+            {/* Countdown Timer */}
+            <div className="flex flex-col gap-3">
+              <p className="text-sm sm:text-base font-semibold text-shop_dark_green">
+                Còn lại:
+              </p>
+              <CountdownTimer targetDate={targetDate} />
+            </div>
+          </div>
+
+          {/* Right Section - Decorative */}
+          <div className="flex flex-col items-center gap-4 sm:gap-6 lg:gap-8 flex-1 w-full min-w-0">
+            <div className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl">
+              <Logo
+                className="w-auto h-24 sm:h-32 md:h-40 lg:h-48 xl:h-56"
+                imageClassName="h-24 sm:h-32 md:h-40 lg:h-48 xl:h-56 w-auto"
+              />
+            </div>
+            <p className="text-lg md:text-xl lg:text-2xl text-center text-shop_light_text font-medium max-w-md">
+              Ưu đãi có hạn - Đừng bỏ lỡ!
+            </p>
+            <div className="flex items-center gap-2 text-red-600 mt-2">
+              <div className="w-12 h-0.5 bg-red-600" />
+              <span className="text-sm sm:text-base font-semibold">
+                SALE SỐC
+              </span>
+              <div className="w-12 h-0.5 bg-red-600" />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

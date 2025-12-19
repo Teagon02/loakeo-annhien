@@ -9,13 +9,10 @@ import { ShoppingBag } from "lucide-react";
 
 const HomeBanner = () => {
   return (
-    <div className="relative w-full min-h-[320px] md:min-h-[400px] lg:min-h-[480px] overflow-hidden rounded-lg md:rounded-xl lg:rounded-2xl">
+    <div className="relative w-full bg-orange-100 min-h-[320px] md:min-h-[400px] lg:min-h-[480px] overflow-hidden rounded-lg md:rounded-xl lg:rounded-2xl">
       {/* Background with gradient */}
-      <div className="absolute inset-0 bg-linear-to-br from-shop_light_pink via-white to-shop_light_bg">
-        <div className="absolute inset-0 bg-linear-to-r from-shop_orange/10 via-transparent to-shop_light_green/10" />
-        {/* Decorative circles */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-shop_light_green/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-shop_orange/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+      <div className="absolute inset-0  via-white ">
+        <div className="absolute inset-0  via-transparent " />
       </div>
 
       {/* Content */}
