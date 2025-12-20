@@ -1,6 +1,6 @@
 import { sanityFetch } from "../lib/live";
 import { LATEST_BLOGS_QUERY, MY_ORDERS_QUERY } from "./query";
-import { DEAL_PRODUCTS_QUERY } from "./query";
+import { DEAL_PRODUCTS_QUERY, PAGINATED_DEAL_PRODUCTS_QUERY } from "./query";
 import { PRODUCT_BY_SLUG_QUERY } from "./query";
 import {
   BLOG_BY_SLUG_QUERY,
@@ -130,10 +130,35 @@ const getPaginatedBlogs = async (page: number = 1, pageSize: number = 6) => {
   }
 };
 
+const getPaginatedDealProducts = async (
+  page: number = 1,
+  pageSize: number = 20
+) => {
+  try {
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+    const { data } = await sanityFetch({
+      query: PAGINATED_DEAL_PRODUCTS_QUERY,
+      params: { start, end },
+    });
+    return {
+      products: data?.products ?? [],
+      total: data?.total ?? 0,
+    };
+  } catch (error) {
+    console.error("Error fetching paginated deal products", error);
+    return {
+      products: [],
+      total: 0,
+    };
+  }
+};
+
 export {
   getCategories,
   getLatestBlogs,
   getDealProducts,
+  getPaginatedDealProducts,
   getProductBySlug,
   getMyOrders,
   getBlogBySlug,

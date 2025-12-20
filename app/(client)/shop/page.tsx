@@ -5,7 +5,7 @@ import Shop from "@/components/Shop";
 const ShopPage = async () => {
   const categories = await getCategories();
   return (
-    <div className="bg-white">
+    <div className="bg-white pb-5">
       <Shop categories={categories} />
     </div>
   );

@@ -15,6 +15,15 @@ const DEAL_PRODUCTS_QUERY = defineQuery(
   }`
 );
 
+const PAGINATED_DEAL_PRODUCTS_QUERY = defineQuery(
+  `{
+    "products": *[_type == 'product' && status == 'hot'] | order(name asc) [$start...$end] {
+      ...,"categories": categories[]->title
+    },
+    "total": count(*[_type == 'product' && status == 'hot'])
+  }`
+);
+
 const PRODUCT_BY_SLUG_QUERY = defineQuery(
   `*[_type == "product" && slug.current == $slug] | order(name asc)[0]`
 );
@@ -65,6 +74,7 @@ const PAGINATED_BLOGS_QUERY = defineQuery(
 export {
   LATEST_BLOGS_QUERY,
   DEAL_PRODUCTS_QUERY,
+  PAGINATED_DEAL_PRODUCTS_QUERY,
   PRODUCT_BY_SLUG_QUERY,
   MY_ORDERS_QUERY,
   BLOG_BY_SLUG_QUERY,

@@ -9,16 +9,15 @@ import NoProductAvailable from "./NoProductAvailable";
 import { AnimatePresence } from "motion/react";
 import ProductCard from "./ProductCard";
 import { Product } from "@/sanity.types";
+import Pagination from "./Pagination";
 
 const ProductGrid = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [totalCount, setTotalCount] = useState(0); // Tổng số sản phẩm
   const [loading, setLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState(productType[0]?.title || "");
-
-  // truy vấn
-  const query = `*[_type == "product" && variant==$variant] | order(name desc) {
-    ...,"categories":categories[]->title
-    }`;
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20; // Số sản phẩm mỗi trang
 
   const currentTabValue = productType.find(
     (item) => item.title === selectedTab
@@ -31,12 +30,38 @@ const ProductGrid = () => {
     [currentTabValue]
   );
 
+  // Fetch tổng số sản phẩm (chỉ khi tab thay đổi)
+  useEffect(() => {
+    const fetchTotalCount = async () => {
+      try {
+        const countQuery = `count(*[_type == "product" && variant==$variant])`;
+        const total = await client.fetch(countQuery, params, {
+          next: { revalidate: 60 },
+        });
+        setTotalCount(total);
+      } catch (error) {
+        console.error("Error fetching total count", error);
+      }
+    };
+    fetchTotalCount();
+  }, [selectedTab, params]);
+
+  // Fetch sản phẩm với pagination
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
+        // Tính toán offset và limit cho pagination
+        const offset = (currentPage - 1) * itemsPerPage;
+        const limit = itemsPerPage;
+
+        // Query với pagination
+        const paginatedQuery = `*[_type == "product" && variant==$variant] | order(name desc) [${offset}...${offset + limit}] {
+    ...,"categories":categories[]->title
+    }`;
+
         const respone = await client.fetch(
-          query,
+          paginatedQuery,
           params,
           { next: { revalidate: 60 } } // Cache 60 giây cho client-side fetch
         );
@@ -48,7 +73,17 @@ const ProductGrid = () => {
       }
     };
     fetchData();
-  }, [selectedTab, query, params]);
+  }, [selectedTab, currentPage, params, itemsPerPage]);
+
+  // Reset về trang 1 khi tab thay đổi
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedTab]);
+
+  // Tính tổng số trang dựa trên totalCount
+  const totalPages = useMemo(() => {
+    return Math.ceil(totalCount / itemsPerPage);
+  }, [totalCount, itemsPerPage]);
   return (
     <div>
       <HomeTabBar selectedTab={selectedTab} setSelectedTab={setSelectedTab} />
@@ -60,22 +95,34 @@ const ProductGrid = () => {
           </div>
         </div>
       ) : products?.length ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-10">
-          <>
-            {products?.map((product) => (
-              <AnimatePresence key={product?._id}>
-                <motion.div
-                  layout
-                  initial={{ opacity: 0.2 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <ProductCard product={product} />
-                </motion.div>
-              </AnimatePresence>
-            ))}
-          </>
-        </div>
+        <>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5 mt-10">
+            <>
+              {products?.map((product) => (
+                <AnimatePresence key={product?._id}>
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0.2 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <ProductCard product={product} />
+                  </motion.div>
+                </AnimatePresence>
+              ))}
+            </>
+          </div>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-8 mb-5">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            </div>
+          )}
+        </>
       ) : (
         <NoProductAvailable selectedTab={selectedTab} />
       )}

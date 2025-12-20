@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Category, Product } from "@/sanity.types";
 import Container from "./Container";
 import { Title } from "./ui/text";
@@ -18,6 +18,7 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
+import Pagination from "./Pagination";
 
 interface Props {
   categories: Category[];
@@ -26,12 +27,15 @@ const Shop = ({ categories }: Props) => {
   const searchParams = useSearchParams();
   const categoryParams = searchParams?.get("category");
   const [products, setProducts] = useState<Product[]>([]);
+  const [totalCount, setTotalCount] = useState(0); // Tổng số sản phẩm
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
     categoryParams || null
   );
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20; // Số sản phẩm mỗi trang
   // State tạm thời cho filter trong dialog
   const [tempSelectedCategory, setTempSelectedCategory] = useState<
     string | null
@@ -52,8 +56,45 @@ const Shop = ({ categories }: Props) => {
     setSelectedCategory(tempSelectedCategory);
     setSelectedPrice(tempSelectedPrice);
     setIsFilterOpen(false);
+    setCurrentPage(1); // Reset về trang 1 khi filter thay đổi
   };
 
+  // Fetch tổng số sản phẩm (chỉ khi filter thay đổi)
+  const fetchTotalCount = useCallback(async () => {
+    try {
+      let minPrice = 0;
+      let maxPrice = 1000000000;
+      if (selectedPrice) {
+        const [min, max] = selectedPrice.split("-").map(Number);
+        minPrice = min;
+        maxPrice = max;
+      }
+
+      const countQuery = `
+  count(*[
+    _type == "product"
+    && (!defined($selectedCategory) || references(*[_type == "category" && slug.current == $selectedCategory]._id))
+    && (!defined($minPrice) || price >= $minPrice)
+    && price <= ${maxPrice}
+  ])
+`;
+
+      const total = await client.fetch(
+        countQuery,
+        {
+          selectedCategory,
+          minPrice,
+        },
+        { next: { revalidate: 60 } }
+      );
+
+      setTotalCount(total);
+    } catch (error) {
+      console.error("Error fetching total count", error);
+    }
+  }, [selectedCategory, selectedPrice]);
+
+  // Fetch sản phẩm với pagination
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     try {
@@ -64,35 +105,55 @@ const Shop = ({ categories }: Props) => {
         minPrice = min;
         maxPrice = max;
       }
-      const query = `
+
+      // Tính toán offset và limit cho pagination
+      const offset = (currentPage - 1) * itemsPerPage;
+      const limit = itemsPerPage;
+
+      // Query để lấy sản phẩm với pagination
+      const productsQuery = `
   *[
     _type == "product"
     && (!defined($selectedCategory) || references(*[_type == "category" && slug.current == $selectedCategory]._id))
     && (!defined($minPrice) || price >= $minPrice)
     && price <= ${maxPrice}
-  ] | order(name asc) {
+  ] | order(name asc) [${offset}...${offset + limit}] {
     ...,"categories":categories[]->title
   }
 `;
+
       const data = await client.fetch(
-        query,
+        productsQuery,
         {
           selectedCategory,
           minPrice,
         },
-        { next: { revalidate: 60 } } // Cache 60 giây cho client-side fetch
+        { next: { revalidate: 60 } }
       );
+
       setProducts(data);
     } catch (error) {
       console.error("Error fetching products", error);
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, selectedPrice]);
+  }, [selectedCategory, selectedPrice, currentPage, itemsPerPage]);
 
+  // Reset về trang 1 và fetch lại count khi filter thay đổi
+  useEffect(() => {
+    setCurrentPage(1);
+    fetchTotalCount();
+  }, [selectedCategory, selectedPrice, fetchTotalCount]);
+
+  // Fetch products khi filter hoặc page thay đổi
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  // Tính tổng số trang dựa trên totalCount
+  const totalPages = useMemo(() => {
+    return Math.ceil(totalCount / itemsPerPage);
+  }, [totalCount, itemsPerPage]);
 
   return (
     <div>
@@ -149,6 +210,7 @@ const Shop = ({ categories }: Props) => {
               onClick={() => {
                 setSelectedCategory(null);
                 setSelectedPrice(null);
+                setCurrentPage(1); // Reset về trang 1 khi reset filter
               }}
               className="text-shop_dark_green underline-offset-2 text-sm font-bold hover:bg-red-500/30 border border-red-500 py-2 px-2 rounded-lg bg-red-500/10 hoverEffect w-36 md:w-auto"
             >
@@ -172,8 +234,8 @@ const Shop = ({ categories }: Props) => {
               setSelectedPrice={setSelectedPrice}
             />
           </div>
-          <div className="flex-1 pt-5">
-            <div className="h-[calc(100vh-160px)] overflow-y-auto pr-2 scrollbar-hide">
+          <div className="flex-1 pt-5 flex flex-col">
+            <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide min-h-0">
               {loading ? (
                 <div className="p-20 flex flex-col gap-2 items-center justify-center bg-white">
                   <Loader2 className="w-10 h-10 text-shop_dark_green animate-spin" />
@@ -191,6 +253,16 @@ const Shop = ({ categories }: Props) => {
                 <NoProductAvailable className="bg-white mt-0 w-full" />
               )}
             </div>
+            {/* Pagination - hiển thị bên ngoài scroll container */}
+            {!loading && products?.length > 0 && totalPages > 1 && (
+              <div className="mt-6 pb-5 pt-4 border-t border-t-shop_dark_green/20">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={setCurrentPage}
+                />
+              </div>
+            )}
           </div>
         </div>
       </Container>

@@ -1,13 +1,10 @@
 import Container from "@/components/Container";
-import ProductCard from "@/components/ProductCard";
-import { getDealProducts } from "@/sanity/queries";
 import { Title } from "@/components/ui/text";
 import React from "react";
 import DealBanner from "@/components/DealBanner";
-import { Product } from "@/sanity.types";
+import DealProducts from "@/components/DealProducts";
 
 const DealPage = async () => {
-  const products = await getDealProducts();
   return (
     <div className="py-10 bg-deal-bg">
       <Container>
@@ -16,14 +13,7 @@ const DealPage = async () => {
           Ưu đãi hấp dẫn cho bạn
         </Title>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2.5">
-          {products?.map((product) => (
-            <ProductCard
-              key={product?._id}
-              product={product as unknown as Product}
-            />
-          ))}
-        </div>
+        <DealProducts />
       </Container>
     </div>
   );
