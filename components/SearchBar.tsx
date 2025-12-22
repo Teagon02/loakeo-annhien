@@ -2,7 +2,7 @@
 
 import { Search, X } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { client } from "@/sanity/lib/client";
@@ -13,7 +13,9 @@ import Link from "next/link";
 import PriceView from "./PriceView";
 
 const SearchBar = () => {
-  const [searchInput, setSearchInput] = useState("");
+  const searchParams = useSearchParams();
+  const searchParamFromUrl = searchParams?.get("search") || "";
+  const [searchInput, setSearchInput] = useState(searchParamFromUrl);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -24,6 +26,21 @@ const SearchBar = () => {
   const cacheRef = useRef<
     Map<string, { suggestions: string[]; products: Product[] }>
   >(new Map());
+  const isUserTypingRef = useRef(false);
+
+  // Đồng bộ searchInput với URL khi component mount hoặc URL thay đổi từ bên ngoài
+  useEffect(() => {
+    const urlSearchValue = searchParams?.get("search") || "";
+    // Sync khi URL thay đổi và giá trị khác với input hiện tại
+    // Nếu user đang gõ nhưng URL đã thay đổi từ bên ngoài, vẫn sync (reset flag)
+    if (urlSearchValue !== searchInput) {
+      if (isUserTypingRef.current) {
+        // URL thay đổi từ bên ngoài trong khi user đang gõ -> reset flag và sync
+        isUserTypingRef.current = false;
+      }
+      setSearchInput(urlSearchValue);
+    }
+  }, [searchParams]);
 
   // Fetch suggestions và products khi searchInput thay đổi
   useEffect(() => {
@@ -52,22 +69,22 @@ const SearchBar = () => {
     }
 
     debouncedSearch.current = setTimeout(async () => {
+      isUserTypingRef.current = false; // Reset flag sau khi debounce
       setLoading(true);
       try {
         const searchPattern = `*${trimmedInput}*`;
-        const searchPatternLower = `*${trimmedInput.toLowerCase()}*`;
 
         // Gộp thành 1 query duy nhất để tối ưu hiệu năng
-        const combinedQuery = `*[_type == "product" && (lower(name) match $searchPatternLower || name match $searchPattern) && defined(slug.current)] | order(name asc) [0...10] {
-          ...,
-          "categories": categories[]->title
-        }`;
+        // match operator trong Sanity đã case-insensitive, không cần lower()
+        const combinedQuery = `*[_type == "product" && name match $searchPattern && defined(slug.current)] | order(name asc) [0...10] {
+            ...,
+            "categories": categories[]->title
+          }`;
 
         const productsData = await client.fetch(
           combinedQuery,
           {
             searchPattern,
-            searchPatternLower,
           },
           { next: { revalidate: 60 } } // Cache 60 giây
         );
@@ -134,6 +151,7 @@ const SearchBar = () => {
   }, []);
 
   const handleSearch = (keyword?: string) => {
+    isUserTypingRef.current = false; // Reset flag khi submit
     const trimmedValue = keyword || searchInput.trim();
     if (trimmedValue) {
       router.push(`/shop?search=${encodeURIComponent(trimmedValue)}`);
@@ -150,6 +168,7 @@ const SearchBar = () => {
   };
 
   const handleSuggestionClick = (keyword: string) => {
+    isUserTypingRef.current = false;
     setSearchInput(keyword);
     handleSearch(keyword);
   };
@@ -166,18 +185,22 @@ const SearchBar = () => {
             type="text"
             placeholder="Tìm kiếm sản phẩm..."
             value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
+            onChange={(e) => {
+              isUserTypingRef.current = true;
+              setSearchInput(e.target.value);
+            }}
             onKeyDown={handleKeyDown}
             onFocus={() => {
               if (suggestions.length > 0 || suggestedProducts.length > 0) {
                 setShowSuggestions(true);
               }
             }}
-            className="w-full pl-10 pr-10 h-9 text-sm border-0 hover:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
+            className="w-full touch-manipulation pl-10 pr-10 h-9 text-sm border-0 hover:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
           />
           {searchInput && (
             <button
               onClick={() => {
+                isUserTypingRef.current = false;
                 setSearchInput("");
                 setSuggestions([]);
                 setSuggestedProducts([]);

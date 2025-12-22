@@ -99,11 +99,10 @@ const Shop = ({ categories }: Props) => {
       }
 
       // Xử lý pattern tìm kiếm theo tên sản phẩm
+      // match operator trong Sanity đã case-insensitive, không cần lower()
       let searchPattern: string | null = null;
-      let searchPatternLower: string | null = null;
       if (searchParam && searchParam.trim()) {
         searchPattern = `*${searchParam}*`;
-        searchPatternLower = `*${searchParam.toLowerCase()}*`;
       }
 
       const countQuery = `
@@ -111,7 +110,7 @@ const Shop = ({ categories }: Props) => {
     _type == "product"
     && (!defined($selectedCategory) || references(*[_type == "category" && slug.current == $selectedCategory]._id))
     && (!defined($minPrice) || price >= $minPrice)
-    && (!defined($searchPatternLower) || lower(name) match $searchPatternLower || name match $searchPattern)
+    && (!defined($searchPattern) || name match $searchPattern)
     && price <= ${maxPrice}
   ])
 `;
@@ -122,7 +121,6 @@ const Shop = ({ categories }: Props) => {
           selectedCategory,
           minPrice,
           searchPattern,
-          searchPatternLower,
         },
         { next: { revalidate: 60 } }
       );
@@ -146,11 +144,10 @@ const Shop = ({ categories }: Props) => {
       }
 
       // Xử lý pattern tìm kiếm theo tên sản phẩm
+      // match operator trong Sanity đã case-insensitive, không cần lower()
       let searchPattern: string | null = null;
-      let searchPatternLower: string | null = null;
       if (searchParam && searchParam.trim()) {
         searchPattern = `*${searchParam}*`;
-        searchPatternLower = `*${searchParam.toLowerCase()}*`;
       }
 
       // Tính toán offset và limit cho pagination
@@ -163,7 +160,7 @@ const Shop = ({ categories }: Props) => {
     _type == "product"
     && (!defined($selectedCategory) || references(*[_type == "category" && slug.current == $selectedCategory]._id))
     && (!defined($minPrice) || price >= $minPrice)
-    && (!defined($searchPatternLower) || lower(name) match $searchPatternLower || name match $searchPattern)
+    && (!defined($searchPattern) || name match $searchPattern)
     && price <= ${maxPrice}
   ] | order(name asc) [${offset}...${offset + limit}] {
     ...,"categories":categories[]->title
@@ -176,7 +173,6 @@ const Shop = ({ categories }: Props) => {
           selectedCategory,
           minPrice,
           searchPattern,
-          searchPatternLower,
         },
         { next: { revalidate: 60 } }
       );
@@ -209,10 +205,10 @@ const Shop = ({ categories }: Props) => {
     <div>
       <Container className="mt-5">
         {/* Filter tiêu đề & Reset */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-0 border py-5 px-2 rounded-lg bg-white">
+        <div className="border py-2 px-1 rounded-sm bg-shop_light_green/30">
           {/* Tiêu đề */}
-          <Title className="text-lg uppercase tracking-wide">
-            Chọn sản phẩm theo nhu cầu của bạn
+          <Title className="text-lg uppercase tracking-wide text-center">
+            Danh sách sản phẩm
           </Title>
         </div>
         <div className="flex items-center gap-2 py-2">
@@ -222,15 +218,17 @@ const Shop = ({ categories }: Props) => {
               <Button
                 variant="outline"
                 size="sm"
-                className="md:hidden flex items-center gap-2"
+                className="md:hidden flex items-center gap-2 bg-blue-300/60 font-bold border"
               >
                 <Filter className="w-4 h-4" />
                 Lọc
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md max-h-[85vh] flex flex-col">
+            <DialogContent className="max-h-[85vh] flex flex-col max-w-[calc(100%-2rem)] sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>Lọc sản phẩm</DialogTitle>
+                <DialogTitle className="border-b pb-2">
+                  Lọc sản phẩm
+                </DialogTitle>
               </DialogHeader>
               <div className="flex-1 overflow-y-auto space-y-4 pr-2">
                 <CategoryList
