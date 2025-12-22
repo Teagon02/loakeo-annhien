@@ -17,7 +17,7 @@ const AddToWishList = ({
   className?: string;
 }) => {
   const { isSignedIn } = useAuth();
-  const { addToFavorite, removeFromFavorite, favoriteProduct } = useStore();
+  const { addToFavorite, favoriteProduct } = useStore();
   const [existingProduct, setExistingProduct] = useState<Product | null>(null);
 
   useEffect(() => {

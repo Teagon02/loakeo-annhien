@@ -51,7 +51,11 @@ const BlogPage = async ({ searchParams }: BlogPageProps) => {
                 <Link href={`/blog/${blog.slug?.current}`}>
                   <div className="relative w-full h-64 overflow-hidden bg-shop_light_bg">
                     <Image
-                      src={urlFor(blog.mainImage).width(1200).quality(85).format('webp').url()}
+                      src={urlFor(blog.mainImage)
+                        .width(1200)
+                        .quality(85)
+                        .format("webp")
+                        .url()}
                       alt={blog.title || "Ảnh blog"}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"

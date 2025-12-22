@@ -5,7 +5,7 @@ import Container from "./Container";
 import { Title } from "./ui/text";
 import CategoryList from "./shop/CategoryList";
 import PriceList from "./shop/PriceList";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { client } from "@/sanity/lib/client";
 import { Loader2, Filter } from "lucide-react";
 import NoProductAvailable from "./NoProductAvailable";
@@ -25,7 +25,10 @@ interface Props {
 }
 const Shop = ({ categories }: Props) => {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const categoryParams = searchParams?.get("category");
+  const searchParam = searchParams?.get("search");
   const [products, setProducts] = useState<Product[]>([]);
   const [totalCount, setTotalCount] = useState(0); // Tổng số sản phẩm
   const [loading, setLoading] = useState(false);
@@ -52,6 +55,31 @@ const Shop = ({ categories }: Props) => {
     }
   }, [isFilterOpen, selectedCategory, selectedPrice]);
 
+  // Đồng bộ slug category lên URL (?category=slug)
+  useEffect(() => {
+    if (!router || !pathname) return;
+
+    const params = new URLSearchParams(searchParams?.toString());
+    const currentParam = params.get("category") || "";
+    const nextValue = selectedCategory || "";
+
+    if (nextValue) {
+      params.set("category", nextValue);
+    } else {
+      params.delete("category");
+    }
+
+    const queryString = params.toString();
+    const targetUrl = queryString ? `${pathname}?${queryString}` : pathname;
+
+    // Chỉ push khi giá trị thực sự thay đổi để tránh loop
+    if (currentParam === nextValue || (!currentParam && !nextValue)) {
+      return;
+    }
+
+    router.push(targetUrl, { scroll: false });
+  }, [selectedCategory, searchParams, pathname, router]);
+
   const handleApplyFilter = () => {
     setSelectedCategory(tempSelectedCategory);
     setSelectedPrice(tempSelectedPrice);
@@ -70,11 +98,20 @@ const Shop = ({ categories }: Props) => {
         maxPrice = max;
       }
 
+      // Xử lý pattern tìm kiếm theo tên sản phẩm
+      let searchPattern: string | null = null;
+      let searchPatternLower: string | null = null;
+      if (searchParam && searchParam.trim()) {
+        searchPattern = `*${searchParam}*`;
+        searchPatternLower = `*${searchParam.toLowerCase()}*`;
+      }
+
       const countQuery = `
   count(*[
     _type == "product"
     && (!defined($selectedCategory) || references(*[_type == "category" && slug.current == $selectedCategory]._id))
     && (!defined($minPrice) || price >= $minPrice)
+    && (!defined($searchPatternLower) || lower(name) match $searchPatternLower || name match $searchPattern)
     && price <= ${maxPrice}
   ])
 `;
@@ -84,6 +121,8 @@ const Shop = ({ categories }: Props) => {
         {
           selectedCategory,
           minPrice,
+          searchPattern,
+          searchPatternLower,
         },
         { next: { revalidate: 60 } }
       );
@@ -92,7 +131,7 @@ const Shop = ({ categories }: Props) => {
     } catch (error) {
       console.error("Error fetching total count", error);
     }
-  }, [selectedCategory, selectedPrice]);
+  }, [selectedCategory, selectedPrice, searchParam]);
 
   // Fetch sản phẩm với pagination
   const fetchProducts = useCallback(async () => {
@@ -106,6 +145,14 @@ const Shop = ({ categories }: Props) => {
         maxPrice = max;
       }
 
+      // Xử lý pattern tìm kiếm theo tên sản phẩm
+      let searchPattern: string | null = null;
+      let searchPatternLower: string | null = null;
+      if (searchParam && searchParam.trim()) {
+        searchPattern = `*${searchParam}*`;
+        searchPatternLower = `*${searchParam.toLowerCase()}*`;
+      }
+
       // Tính toán offset và limit cho pagination
       const offset = (currentPage - 1) * itemsPerPage;
       const limit = itemsPerPage;
@@ -116,6 +163,7 @@ const Shop = ({ categories }: Props) => {
     _type == "product"
     && (!defined($selectedCategory) || references(*[_type == "category" && slug.current == $selectedCategory]._id))
     && (!defined($minPrice) || price >= $minPrice)
+    && (!defined($searchPatternLower) || lower(name) match $searchPatternLower || name match $searchPattern)
     && price <= ${maxPrice}
   ] | order(name asc) [${offset}...${offset + limit}] {
     ...,"categories":categories[]->title
@@ -127,6 +175,8 @@ const Shop = ({ categories }: Props) => {
         {
           selectedCategory,
           minPrice,
+          searchPattern,
+          searchPatternLower,
         },
         { next: { revalidate: 60 } }
       );
@@ -137,13 +187,13 @@ const Shop = ({ categories }: Props) => {
     } finally {
       setLoading(false);
     }
-  }, [selectedCategory, selectedPrice, currentPage, itemsPerPage]);
+  }, [selectedCategory, selectedPrice, currentPage, itemsPerPage, searchParam]);
 
   // Reset về trang 1 và fetch lại count khi filter thay đổi
   useEffect(() => {
     setCurrentPage(1);
     fetchTotalCount();
-  }, [selectedCategory, selectedPrice, fetchTotalCount]);
+  }, [selectedCategory, selectedPrice, searchParam, fetchTotalCount]);
 
   // Fetch products khi filter hoặc page thay đổi
   useEffect(() => {

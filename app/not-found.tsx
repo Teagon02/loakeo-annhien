@@ -1,7 +1,6 @@
 import Logo from "@/components/Logo";
 import Link from "next/link";
 import React from "react";
-import { notFound } from "next/navigation";
 
 export default function NotFound() {
   return (

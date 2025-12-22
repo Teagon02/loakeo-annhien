@@ -9,6 +9,9 @@ import FavoriteButton from "@/components/FavoriteButton";
 import { CornerDownLeft, Truck, PlayCircle } from "lucide-react";
 import { MdPriceChange } from "react-icons/md";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { urlFor } from "@/sanity/lib/image";
+import { SanityImageSource } from "@sanity/image-url/lib/types/types";
 
 // Hàm extract YouTube video ID từ URL
 const getYouTubeVideoId = (url: string | undefined): string | null => {
@@ -41,6 +44,45 @@ const getYouTubeVideoId = (url: string | undefined): string | null => {
 
 // ISR: Revalidate mỗi giờ để giảm API calls nhưng vẫn có data mới
 export const revalidate = 3600;
+
+// Dynamic metadata theo từng sản phẩm
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProductBySlug(slug);
+
+  if (!product) {
+    return {
+      title: "Sản phẩm không tồn tại",
+      description: "Sản phẩm bạn tìm không còn tồn tại hoặc đã bị xoá.",
+    };
+  }
+
+  const name = product.name || "Sản phẩm";
+  const description =
+    product.description ||
+    `Mua ${name} chất lượng cao tại Loa Kéo An Nhiên. Giá cả hợp lý, giao hàng toàn quốc.`;
+
+  return {
+    title: name + " - Loa Kéo An Nhiên",
+    description: description + " - Loa Kéo An Nhiên",
+    openGraph: {
+      title: name + " - Loa Kéo An Nhiên",
+      description: description + " - Loa Kéo An Nhiên",
+      type: "website",
+      images: [
+        urlFor(product?.images?.[0] as SanityImageSource)
+          .width(1200)
+          .quality(85)
+          .format("webp")
+          .url(),
+      ],
+    },
+  };
+}
 
 const SingleProductPage = async ({
   params,

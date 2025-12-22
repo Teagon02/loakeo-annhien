@@ -142,7 +142,11 @@ const CartPage = () => {
                     className="border p-0.5 md:p-1 mr-2 rounded-md overflow-hidden group"
                   >
                     <Image
-                      src={urlFor(product?.images[0]).width(320).quality(85).format('webp').url()}
+                      src={urlFor(product?.images[0])
+                        .width(320)
+                        .quality(85)
+                        .format("webp")
+                        .url()}
                       alt="Ảnh sản phẩm"
                       width={500}
                       height={500}

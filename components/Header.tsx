@@ -8,7 +8,7 @@ import FavoriteButton from "./FavoriteButton";
 import SignIn from "./SignIn";
 import MobileMenu from "./MobileMenu";
 import { auth, currentUser } from "@clerk/nextjs/server";
-import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/nextjs";
+import { ClerkLoaded } from "@clerk/nextjs";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import { Logs } from "lucide-react";
 import Link from "next/link";
@@ -33,8 +33,8 @@ const Header = async () => {
             <div className="w-auto flex items-center gap-2.5 justify-start shrink-0">
               <Logo />
             </div>
-            {/* SearchBar ở giữa */}
-            <div className="flex-1 flex justify-center">
+            {/* SearchBar ở giữa - chỉ hiện trên desktop/laptop */}
+            <div className="hidden md:flex flex-1">
               <SearchBar />
             </div>
             {/* Others */}
@@ -57,6 +57,10 @@ const Header = async () => {
               </ClerkLoaded>
               {!user && <SignIn />}
             </div>
+          </div>
+          {/* SearchBar - Full width trên mobile, ẩn trên desktop */}
+          <div className="w-full md:hidden">
+            <SearchBar />
           </div>
         </Container>
         {/* Hàng 2: HeaderMenu - border kéo dài sát 2 bên màn hình */}

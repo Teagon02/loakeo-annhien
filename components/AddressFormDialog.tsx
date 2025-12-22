@@ -40,10 +40,7 @@ interface AddressFormData {
   isDefault: boolean;
 }
 
-const AddressFormDialog = ({
-  onAddressAdded,
-  addresses = [],
-}: AddressFormDialogProps) => {
+const AddressFormDialog = ({ onAddressAdded }: AddressFormDialogProps) => {
   const { user } = useUser();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);

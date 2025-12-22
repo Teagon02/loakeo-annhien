@@ -7,8 +7,8 @@ import { viVN } from "@clerk/localizations";
 import RemoveCartAndWishlist from "@/components/RemoveCartAndWishlist";
 
 export const metadata: Metadata = {
-  title: "Loa Kéo An Nhiên",
-  description: "Loa Kéo An Nhiên",
+  title: "Loa Kéo An Nhiên - Chuyên Độ Chế Loa Kéo Chất Lượng Cao",
+  description: "Loa Kéo An Nhiên - Chuyên Độ Chế Loa Kéo Chất Lượng Cao",
 };
 
 export default function RootLayout({

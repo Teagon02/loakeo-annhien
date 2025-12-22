@@ -6,7 +6,6 @@ import SocialMedia from "@/components/SocialMedia";
 import {
   Home,
   Sparkles,
-  Heart,
   Award,
   Target,
   Users,

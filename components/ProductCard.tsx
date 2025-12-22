@@ -80,7 +80,11 @@ const ProductCard = ({ product }: { product: Product }) => {
             {product?.categories.map((cat) => cat).join(", ")}
           </p>
         )}
-        <Title className="text-sm line-clamp-1">{product?.name}</Title>
+        <Link href={`/product/${product?.slug?.current}`}>
+          <Title className="text-sm line-clamp-1 cursor-pointer hover:text-shop_light_green transition-colors">
+            {product?.name}
+          </Title>
+        </Link>
 
         {/* Rating */}
         <div className="flex items-center gap-2">

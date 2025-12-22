@@ -1,8 +1,3 @@
-import createImageUrlBuilder from "@sanity/image-url";
-import { dataset, projectId } from "@/sanity/env";
-
-const imageBuilder = createImageUrlBuilder({ projectId, dataset });
-
 // Custom loader cho Next.js Image component
 // Nhận src là URL string từ Sanity và optimize với width/quality
 export default function sanityLoader({

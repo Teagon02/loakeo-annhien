@@ -1,16 +1,10 @@
 "use client";
 
-import { Search, Loader2, X } from "lucide-react";
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./ui/dialog";
+import { Search, X } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "./ui/input";
-import { ScrollArea } from "./ui/scroll-area";
+import { Button } from "./ui/button";
 import { client } from "@/sanity/lib/client";
 import { Product } from "@/sanity.types";
 import Image from "next/image";
@@ -19,325 +13,258 @@ import Link from "next/link";
 import PriceView from "./PriceView";
 
 const SearchBar = () => {
-  const [open, setOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [products, setProducts] = useState<Product[]>([]);
+  const [searchInput, setSearchInput] = useState("");
+  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loadingSuggested, setLoadingSuggested] = useState(false);
-  const [debouncedTerm, setDebouncedTerm] = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const router = useRouter();
+  const searchRef = useRef<HTMLDivElement>(null);
+  const debouncedSearch = useRef<NodeJS.Timeout | undefined>(undefined);
+  const cacheRef = useRef<
+    Map<string, { suggestions: string[]; products: Product[] }>
+  >(new Map());
 
-  // Debounce search term
+  // Fetch suggestions và products khi searchInput thay đổi
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedTerm(searchTerm);
-    }, 300);
+    if (debouncedSearch.current) {
+      clearTimeout(debouncedSearch.current);
+    }
 
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
+    const trimmedInput = searchInput.trim();
 
-  // Fetch suggested products when dialog opens
-  useEffect(() => {
-    const fetchSuggestedProducts = async () => {
-      if (!open) return;
+    // Minimum 2 ký tự để tìm kiếm
+    if (!trimmedInput || trimmedInput.length < 2) {
+      setSuggestions([]);
+      setSuggestedProducts([]);
+      setShowSuggestions(false);
+      return;
+    }
 
-      setLoadingSuggested(true);
-      try {
-        // Fetch suggested products: featured, hot, new, or latest products
-        // Priority: featured > hot/new status > recently created
-        const query = `*[_type == "product" && defined(slug.current)] | order(
-          isFeatured desc,
-          _createdAt desc
-        ) [0...5] {
-          ...,
-          "categories": categories[]->title
-        }`;
+    // Kiểm tra cache trước
+    const cacheKey = trimmedInput.toLowerCase();
+    const cached = cacheRef.current.get(cacheKey);
+    if (cached) {
+      setSuggestions(cached.suggestions);
+      setSuggestedProducts(cached.products);
+      setShowSuggestions(true);
+      return;
+    }
 
-        const data = await client.fetch(query);
-        setSuggestedProducts(data || []);
-      } catch (error) {
-        console.error("Error fetching suggested products:", error);
-        setSuggestedProducts([]);
-      } finally {
-        setLoadingSuggested(false);
-      }
-    };
-
-    fetchSuggestedProducts();
-  }, [open]);
-
-  // Search products
-  useEffect(() => {
-    const searchProducts = async () => {
-      if (!debouncedTerm.trim()) {
-        setProducts([]);
-        return;
-      }
-
+    debouncedSearch.current = setTimeout(async () => {
       setLoading(true);
       try {
-        // Use parameterized query for safety
-        const searchPattern = `*${debouncedTerm}*`;
-        const searchPatternLower = `*${debouncedTerm.toLowerCase()}*`;
-        const query = `*[_type == "product" && (lower(name) match $searchPatternLower || name match $searchPattern) && defined(slug.current)] | order(name asc) [0...10] {
+        const searchPattern = `*${trimmedInput}*`;
+        const searchPatternLower = `*${trimmedInput.toLowerCase()}*`;
+
+        // Gộp thành 1 query duy nhất để tối ưu hiệu năng
+        const combinedQuery = `*[_type == "product" && (lower(name) match $searchPatternLower || name match $searchPattern) && defined(slug.current)] | order(name asc) [0...10] {
           ...,
           "categories": categories[]->title
         }`;
 
-        const data = await client.fetch(query, {
-          searchPattern,
-          searchPatternLower,
+        const productsData = await client.fetch(
+          combinedQuery,
+          {
+            searchPattern,
+            searchPatternLower,
+          },
+          { next: { revalidate: 60 } } // Cache 60 giây
+        );
+
+        // Extract keywords từ products (5 keywords đầu tiên)
+        const uniqueKeywords = Array.from(
+          new Set(
+            productsData
+              .map((p: Product) => p.name)
+              .filter(Boolean)
+              .slice(0, 5)
+          )
+        ) as string[];
+
+        // Lấy 5 sản phẩm đầu tiên
+        const products = (productsData || []).slice(0, 5);
+
+        // Lưu vào cache (giới hạn cache size để tránh memory leak)
+        if (cacheRef.current.size > 50) {
+          const firstKey = cacheRef.current.keys().next().value;
+          if (firstKey) {
+            cacheRef.current.delete(firstKey);
+          }
+        }
+        cacheRef.current.set(cacheKey, {
+          suggestions: uniqueKeywords,
+          products: products,
         });
 
-        setProducts(data || []);
+        setSuggestions(uniqueKeywords);
+        setSuggestedProducts(products);
+        setShowSuggestions(true);
       } catch (error) {
-        console.error("Error searching products:", error);
-        setProducts([]);
+        console.error("Error fetching suggestions", error);
+        setSuggestions([]);
+        setSuggestedProducts([]);
       } finally {
         setLoading(false);
       }
+    }, 300);
+
+    return () => {
+      if (debouncedSearch.current) {
+        clearTimeout(debouncedSearch.current);
+      }
+    };
+  }, [searchInput]);
+
+  // Đóng suggestions khi click outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        searchRef.current &&
+        !searchRef.current.contains(event.target as Node)
+      ) {
+        setShowSuggestions(false);
+      }
     };
 
-    searchProducts();
-  }, [debouncedTerm]);
-
-  const handleClose = useCallback(() => {
-    setOpen(false);
-    setSearchTerm("");
-    setProducts([]);
-    setSuggestedProducts([]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
+  const handleSearch = (keyword?: string) => {
+    const trimmedValue = keyword || searchInput.trim();
+    if (trimmedValue) {
+      router.push(`/shop?search=${encodeURIComponent(trimmedValue)}`);
+      setShowSuggestions(false);
+    } else {
+      router.push("/shop");
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
+
+  const handleSuggestionClick = (keyword: string) => {
+    setSearchInput(keyword);
+    handleSearch(keyword);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      {/* Input search bar - Desktop & Mobile */}
-      <div className="relative flex-1 max-w-md mx-2 md:mx-4 group">
-        <div className="relative flex items-center">
-          <Search className="absolute left-3 w-4 h-4 text-gray-400 pointer-events-none group-hover:text-shop_light_green transition-colors" />
+    <div
+      ref={searchRef}
+      className="flex-1 max-w-md md:max-w-full mx-2 md:mx-4 relative"
+    >
+      <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
+        <div className="relative flex-1 flex items-center">
+          <Search className="absolute left-3 w-4 h-4 text-gray-400 pointer-events-none z-10" />
           <Input
             type="text"
             placeholder="Tìm kiếm sản phẩm..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={() => setOpen(true)}
-            className="w-full pl-10 pr-10 h-9 text-sm border-gray-300 hover:border-shop_light_green focus-visible:ring-1 focus-visible:ring-shop_light_green transition-colors hoverEffect"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => {
+              if (suggestions.length > 0 || suggestedProducts.length > 0) {
+                setShowSuggestions(true);
+              }
+            }}
+            className="w-full pl-10 pr-10 h-9 text-sm border-0 hover:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
           />
-          {searchTerm && (
+          {searchInput && (
             <button
               onClick={() => {
-                setSearchTerm("");
-                setProducts([]);
+                setSearchInput("");
+                setSuggestions([]);
+                setSuggestedProducts([]);
+                setShowSuggestions(false);
               }}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors z-10"
               aria-label="Xóa tìm kiếm"
             >
               <X className="w-4 h-4 text-gray-400" />
             </button>
           )}
-          {loading && !searchTerm && (
-            <div className="absolute right-2 top-1/2 -translate-y-1/2">
-              <Loader2 className="w-4 h-4 text-shop_light_green animate-spin" />
-            </div>
-          )}
         </div>
+        <div className="w-px h-6 bg-gray-300"></div>
+        <Button
+          onClick={() => handleSearch()}
+          className="h-9 px-4 bg-white text-shop_light_green hover:bg-shop_light_green/30 shrink-0 border-0 shadow-none rounded-none"
+        >
+          Tìm kiếm
+        </Button>
       </div>
-      <DialogContent className="max-w-2xl w-[calc(100%-2rem)] p-0 gap-0 max-h-[85vh] flex flex-col">
-        <DialogHeader className="sr-only">
-          <DialogTitle>Tìm kiếm sản phẩm</DialogTitle>
-        </DialogHeader>
-        {/* Search Input Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
-          <div className="relative flex items-center gap-3">
-            <Search className="w-5 h-5 text-gray-400 shrink-0" />
-            <div className="relative flex-1">
-              <Input
-                type="text"
-                placeholder="Tìm kiếm sản phẩm..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pr-10 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-base h-12 bg-transparent"
-                autoFocus
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
-                  aria-label="Xóa tìm kiếm"
-                >
-                  <X className="w-4 h-4 text-gray-400" />
-                </button>
-              )}
-              {loading && (
-                <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                  <Loader2 className="w-5 h-5 text-shop_light_green animate-spin" />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
 
-        {/* Results */}
-        <ScrollArea className="flex-1 min-h-0">
-          <div className="p-4">
-            {!debouncedTerm.trim() ? (
-              loadingSuggested ? (
-                <div className="flex flex-col items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 text-shop_light_green animate-spin mb-4" />
-                  <p className="text-gray-500 text-sm">Đang tải sản phẩm...</p>
+      {/* Dropdown Suggestions */}
+      {showSuggestions &&
+        (suggestions.length > 0 || suggestedProducts.length > 0) && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 max-h-96 overflow-y-auto">
+            {/* Từ khóa gợi ý */}
+            {suggestions.length > 0 && (
+              <div className="p-2 border-b border-gray-200">
+                <p className="text-xs font-semibold text-gray-500 mb-2 px-2">
+                  Từ khóa gợi ý
+                </p>
+                <div className="space-y-1">
+                  {suggestions.map((keyword, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSuggestionClick(keyword)}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-gray-100 rounded-md transition-colors flex items-center gap-2"
+                    >
+                      <Search className="w-3 h-3 text-gray-400" />
+                      <span>{keyword}</span>
+                    </button>
+                  ))}
                 </div>
-              ) : suggestedProducts.length > 0 ? (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Sản phẩm gợi ý
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {suggestedProducts.length} sản phẩm
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    {suggestedProducts.map((product) => (
-                      <Link
-                        key={product._id}
-                        href={`/product/${product.slug?.current}`}
-                        onClick={handleClose}
-                        className="group flex items-center gap-4 p-3 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-shop_light_green hover:bg-shop_light_bg/50 transition-all duration-200"
-                      >
-                        {/* Product Image */}
-                        {product.images && product.images[0] && (
-                          <div className="relative w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-md overflow-hidden bg-shop_light_bg">
-                            <Image
-                              src={urlFor(product.images[0]).width(160).quality(85).format('webp').url()}
-                              alt={product.name || "Sản phẩm"}
-                              fill
-                              sizes="(max-width: 768px) 64px, 80px"
-                              unoptimized
-                              className="object-contain group-hover:scale-105 transition-transform duration-200"
-                            />
-                          </div>
-                        )}
-
-                        {/* Product Info */}
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-medium text-sm md:text-base text-gray-900 dark:text-gray-100 group-hover:text-shop_light_green transition-colors line-clamp-2">
-                            {product.name}
-                          </h3>
-                          {product.categories &&
-                            product.categories.length > 0 && (
-                              <p className="text-xs text-gray-500 mt-1 line-clamp-1">
-                                {product.categories.join(", ")}
-                              </p>
-                            )}
-                          <div className="mt-2">
-                            <PriceView
-                              price={product.price as number}
-                              discount={product.discount as number}
-                              className="text-sm"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Stock Status */}
-                        <div className="shrink-0">
-                          {product.stock === 0 ? (
-                            <span className="text-xs font-bold bg-gray-100 text-red-600 rounded-md px-2 py-1">
-                              Hết hàng
-                            </span>
-                          ) : (
-                            <span className="text-xs font-bold bg-gray-100 text-green-600 rounded-md px-2 py-1">
-                              Có sẵn
-                            </span>
-                          )}
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="w-16 h-16 rounded-full bg-shop_light_bg flex items-center justify-center mb-4">
-                    <Search className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <p className="text-gray-500 text-sm">
-                    Nhập từ khóa để tìm kiếm sản phẩm
-                  </p>
-                </div>
-              )
-            ) : loading ? (
-              <div className="flex flex-col items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-shop_light_green animate-spin mb-4" />
-                <p className="text-gray-500 text-sm">Đang tìm kiếm...</p>
               </div>
-            ) : products.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-shop_light_bg flex items-center justify-center mb-4">
-                  <Search className="w-8 h-8 text-gray-400" />
-                </div>
-                <p className="text-gray-600 font-medium mb-1">
-                  Không tìm thấy sản phẩm
+            )}
+
+            {/* Sản phẩm gợi ý */}
+            {suggestedProducts.length > 0 && (
+              <div className="p-2">
+                <p className="text-xs font-semibold text-gray-500 mb-2 px-2">
+                  Sản phẩm liên quan
                 </p>
-                <p className="text-gray-500 text-sm">
-                  Thử tìm kiếm với từ khóa khác
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <p className="text-sm text-gray-500 mb-3">
-                  Tìm thấy {products.length} sản phẩm
-                </p>
-                <div className="space-y-2">
-                  {products.map((product) => (
+                <div className="space-y-1">
+                  {suggestedProducts.map((product) => (
                     <Link
                       key={product._id}
                       href={`/product/${product.slug?.current}`}
-                      onClick={handleClose}
-                      className="group flex items-center gap-4 p-3 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-shop_light_green hover:bg-shop_light_bg/50 transition-all duration-200"
+                      onClick={() => setShowSuggestions(false)}
+                      className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-md transition-colors group"
                     >
-                      {/* Product Image */}
                       {product.images && product.images[0] && (
-                        <div className="relative w-16 h-16 md:w-20 md:h-20 shrink-0 rounded-md overflow-hidden bg-shop_light_bg">
+                        <div className="relative w-12 h-12 shrink-0 rounded-md overflow-hidden bg-gray-100">
                           <Image
-                            src={urlFor(product.images[0]).width(160).quality(85).format('webp').url()}
+                            src={urlFor(product.images[0])
+                              .width(96)
+                              .height(96)
+                              .quality(85)
+                              .format("webp")
+                              .url()}
                             alt={product.name || "Sản phẩm"}
                             fill
-                            sizes="(max-width: 768px) 64px, 80px"
-                            unoptimized
-                            className="object-contain group-hover:scale-105 transition-transform duration-200"
+                            sizes="48px"
+                            className="object-contain group-hover:scale-105 transition-transform"
                           />
                         </div>
                       )}
-
-                      {/* Product Info */}
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-sm md:text-base text-gray-900 dark:text-gray-100 group-hover:text-shop_light_green transition-colors line-clamp-2">
+                        <h3 className="text-sm font-medium text-gray-900 group-hover:text-shop_light_green transition-colors line-clamp-1">
                           {product.name}
                         </h3>
-                        {product.categories &&
-                          product.categories.length > 0 && (
-                            <p className="text-xs text-gray-500 mt-1 line-clamp-1">
-                              {product.categories.join(", ")}
-                            </p>
-                          )}
-                        <div className="mt-2">
+                        <div className="mt-1">
                           <PriceView
                             price={product.price as number}
                             discount={product.discount as number}
-                            className="text-sm"
+                            className="text-xs"
                           />
                         </div>
-                      </div>
-
-                      {/* Stock Status */}
-                      <div className="shrink-0">
-                        {product.stock === 0 ? (
-                          <span className="text-xs text-red-600 font-medium">
-                            Hết hàng
-                          </span>
-                        ) : (
-                          <span className="text-xs text-shop_light_green font-medium">
-                            Còn hàng
-                          </span>
-                        )}
                       </div>
                     </Link>
                   ))}
@@ -345,9 +272,8 @@ const SearchBar = () => {
               </div>
             )}
           </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
+        )}
+    </div>
   );
 };
 

@@ -151,16 +151,16 @@ const ImageView = ({ images = [], isStock = undefined }: Props) => {
                 className="w-full h-auto object-contain"
               />
               {active?._key === image?._key ? (
-                <button
+                <div
                   onClick={(e) => {
                     e.stopPropagation();
                     openFullscreen(index);
                   }}
-                  className="absolute inset-0 bg-black/40 hover:bg-black/60 active:bg-black/70 text-white flex items-center justify-center transition-all opacity-100 hoverEffect touch-manipulation"
+                  className="absolute inset-0 bg-black/40 hover:bg-black/60 active:bg-black/70 text-white flex items-center justify-center transition-all opacity-100 hoverEffect touch-manipulation cursor-pointer"
                   aria-label="Phóng to ảnh"
                 >
                   <Maximize2 size={14} className="md:w-4 md:h-4" />
-                </button>
+                </div>
               ) : null}
             </button>
           ))}

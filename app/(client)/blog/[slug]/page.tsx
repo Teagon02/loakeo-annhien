@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import dayjs from "dayjs";
 import { PortableText } from "@portabletext/react";
-import { BlockContent, Blogcategory } from "@/sanity.types";
+import { BlockContent } from "@/sanity.types";
 import { notFound } from "next/navigation";
 
 // ISR: Revalidate mỗi giờ để giảm API calls nhưng vẫn có data mới
@@ -30,7 +30,7 @@ const PortableTextComponents = {
       return (
         <div className="my-8">
           <Image
-            src={urlFor(value).width(1600).quality(85).format('webp').url()}
+            src={urlFor(value).width(1600).quality(85).format("webp").url()}
             alt={value.alt || "Blog image"}
             width={800}
             height={600}
@@ -165,7 +165,11 @@ const SingleBlogPage = async ({
                 {blog.author.image ? (
                   <div className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-shop_light_green">
                     <Image
-                      src={urlFor(blog.author.image).width(80).quality(85).format('webp').url()}
+                      src={urlFor(blog.author.image)
+                        .width(80)
+                        .quality(85)
+                        .format("webp")
+                        .url()}
                       alt={blog.author.name || "Tác giả"}
                       fill
                       sizes="40px"
@@ -199,7 +203,11 @@ const SingleBlogPage = async ({
           {blog.mainImage && (
             <div className="relative w-full h-[400px] md:h-[500px] rounded-lg overflow-hidden mb-8">
               <Image
-                src={urlFor(blog.mainImage).width(1920).quality(85).format('webp').url()}
+                src={urlFor(blog.mainImage)
+                  .width(1920)
+                  .quality(85)
+                  .format("webp")
+                  .url()}
                 alt={blog.title || "Blog image"}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
