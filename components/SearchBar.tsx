@@ -18,7 +18,6 @@ const SearchBar = () => {
   const [searchInput, setSearchInput] = useState(searchParamFromUrl);
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [suggestedProducts, setSuggestedProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const router = useRouter();
   const searchRef = useRef<HTMLDivElement>(null);
@@ -40,7 +39,7 @@ const SearchBar = () => {
       }
       setSearchInput(urlSearchValue);
     }
-  }, [searchParams]);
+  }, [searchParams, searchInput]);
 
   // Fetch suggestions và products khi searchInput thay đổi
   useEffect(() => {
@@ -70,7 +69,6 @@ const SearchBar = () => {
 
     debouncedSearch.current = setTimeout(async () => {
       isUserTypingRef.current = false; // Reset flag sau khi debounce
-      setLoading(true);
       try {
         const searchPattern = `*${trimmedInput}*`;
 
@@ -121,8 +119,6 @@ const SearchBar = () => {
         console.error("Error fetching suggestions", error);
         setSuggestions([]);
         setSuggestedProducts([]);
-      } finally {
-        setLoading(false);
       }
     }, 300);
 

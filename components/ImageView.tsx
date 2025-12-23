@@ -17,7 +17,7 @@ interface Props {
       _ref: string;
       _type: "reference";
       _weak?: boolean;
-      [internalGroqTypeReferenceTo]?: "sanity.imageAsset"; // eslint-disable-line @typescript-eslint/no-explicit-any
+      [internalGroqTypeReferenceTo]?: "sanity.imageAsset";
     };
     hotspot?: SanityImageHotspot;
     crop?: SanityImageCrop;
