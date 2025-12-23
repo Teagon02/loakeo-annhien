@@ -1,11 +1,14 @@
 import { sanityFetch } from "../lib/live";
-import { LATEST_BLOGS_QUERY, MY_ORDERS_QUERY } from "./query";
-import { DEAL_PRODUCTS_QUERY, PAGINATED_DEAL_PRODUCTS_QUERY } from "./query";
-import { PRODUCT_BY_SLUG_QUERY } from "./query";
 import {
+  LATEST_BLOGS_QUERY,
+  MY_ORDERS_QUERY,
+  DEAL_PRODUCTS_QUERY,
+  PAGINATED_DEAL_PRODUCTS_QUERY,
+  PRODUCT_BY_SLUG_QUERY,
   BLOG_BY_SLUG_QUERY,
   ALL_BLOGS_QUERY,
   PAGINATED_BLOGS_QUERY,
+  SITE_SETTINGS_QUERY,
 } from "./query";
 
 const getCategories = async (quantity?: number) => {
@@ -154,6 +157,18 @@ const getPaginatedDealProducts = async (
   }
 };
 
+const getSiteSettings = async () => {
+  try {
+    const { data } = await sanityFetch({
+      query: SITE_SETTINGS_QUERY,
+    });
+    return data ?? null;
+  } catch (error) {
+    console.error("Error fetching site settings", error);
+    return null;
+  }
+};
+
 export {
   getCategories,
   getLatestBlogs,
@@ -164,4 +179,5 @@ export {
   getBlogBySlug,
   getAllBlogs,
   getPaginatedBlogs,
+  getSiteSettings,
 };
