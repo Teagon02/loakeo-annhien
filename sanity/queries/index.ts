@@ -8,7 +8,6 @@ import {
   BLOG_BY_SLUG_QUERY,
   ALL_BLOGS_QUERY,
   PAGINATED_BLOGS_QUERY,
-  SITE_SETTINGS_QUERY,
 } from "./query";
 
 const getCategories = async (quantity?: number) => {
@@ -157,18 +156,6 @@ const getPaginatedDealProducts = async (
   }
 };
 
-const getSiteSettings = async () => {
-  try {
-    const { data } = await sanityFetch({
-      query: SITE_SETTINGS_QUERY,
-    });
-    return data ?? null;
-  } catch (error) {
-    console.error("Error fetching site settings", error);
-    return null;
-  }
-};
-
 export {
   getCategories,
   getLatestBlogs,
@@ -179,5 +166,4 @@ export {
   getBlogBySlug,
   getAllBlogs,
   getPaginatedBlogs,
-  getSiteSettings,
 };
