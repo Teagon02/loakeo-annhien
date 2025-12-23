@@ -31,6 +31,7 @@ export default function EmptyCart() {
             alt="Giỏ hàng trống"
             layout="fill"
             objectFit="contain"
+            unoptimized
             className="drop-shadow-lg"
           />
           <motion.div

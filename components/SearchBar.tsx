@@ -273,6 +273,7 @@ const SearchBar = () => {
                             alt={product.name || "Sản phẩm"}
                             fill
                             sizes="48px"
+                            unoptimized
                             className="object-contain group-hover:scale-105 transition-transform"
                           />
                         </div>

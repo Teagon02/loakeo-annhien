@@ -175,6 +175,7 @@ const AboutPage = () => {
                       src={image.src}
                       alt={`Hình ảnh về chúng tôi ${index + 1}`}
                       fill
+                      unoptimized
                       className="object-cover"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
                     />
