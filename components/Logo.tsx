@@ -37,7 +37,6 @@ const Logo = ({
         src={banner}
         alt="Loa Kéo An Nhiên"
         priority
-        unoptimized
         className={cn("h-12 w-auto object-contain", imageClassName)}
       />
       <span className="sr-only">
