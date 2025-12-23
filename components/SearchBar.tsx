@@ -195,7 +195,7 @@ const SearchBar = () => {
                 setShowSuggestions(true);
               }
             }}
-            className="w-full touch-manipulation pl-10 pr-10 h-9 text-sm border-0 hover:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
+            className="w-full touch-manipulation pl-10 pr-10 h-9 text-base md:text-sm border-0 hover:border-0 focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
           />
           {searchInput && (
             <button
