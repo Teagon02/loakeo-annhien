@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { banner_1 } from "@/images";
+import banner_2 from "@/images/banner/banner_2.png";
 import { cn } from "@/lib/utils";
 
 const Logo = ({
@@ -34,7 +34,7 @@ const Logo = ({
     // </Link>
     <Link href={"/"} className={cn("inline-flex items-center", className)}>
       <Image
-        src={banner_1}
+        src={banner_2}
         alt="Loa Kéo An Nhiên"
         priority
         className={cn("h-12 w-auto object-contain", imageClassName)}
