@@ -26,20 +26,20 @@ const SearchBar = () => {
     Map<string, { suggestions: string[]; products: Product[] }>
   >(new Map());
   const isUserTypingRef = useRef(false);
+  const isSearchingRef = useRef(false);
 
   // Đồng bộ searchInput với URL khi component mount hoặc URL thay đổi từ bên ngoài
   useEffect(() => {
     const urlSearchValue = searchParams?.get("search") || "";
-    // Sync khi URL thay đổi và giá trị khác với input hiện tại
-    // Nếu user đang gõ nhưng URL đã thay đổi từ bên ngoài, vẫn sync (reset flag)
-    if (urlSearchValue !== searchInput) {
-      if (isUserTypingRef.current) {
-        // URL thay đổi từ bên ngoài trong khi user đang gõ -> reset flag và sync
-        isUserTypingRef.current = false;
-      }
+    // Chỉ sync khi URL thay đổi từ bên ngoài, không sync khi user đang gõ
+    if (!isUserTypingRef.current && urlSearchValue !== searchInput) {
       setSearchInput(urlSearchValue);
+      // Đóng suggestions khi URL thay đổi (sau khi search hoặc navigate)
+      setShowSuggestions(false);
+      // Reset flag search sau khi URL đã thay đổi
+      isSearchingRef.current = false;
     }
-  }, [searchParams, searchInput]);
+  }, [searchParams]);
 
   // Fetch suggestions và products khi searchInput thay đổi
   useEffect(() => {
@@ -63,7 +63,10 @@ const SearchBar = () => {
     if (cached) {
       setSuggestions(cached.suggestions);
       setSuggestedProducts(cached.products);
-      setShowSuggestions(true);
+      // Chỉ hiển thị suggestions nếu không đang trong quá trình search
+      if (!isSearchingRef.current) {
+        setShowSuggestions(true);
+      }
       return;
     }
 
@@ -114,7 +117,10 @@ const SearchBar = () => {
 
         setSuggestions(uniqueKeywords);
         setSuggestedProducts(products);
-        setShowSuggestions(true);
+        // Chỉ hiển thị suggestions nếu không đang trong quá trình search
+        if (!isSearchingRef.current) {
+          setShowSuggestions(true);
+        }
       } catch (error) {
         console.error("Error fetching suggestions", error);
         setSuggestions([]);
@@ -148,12 +154,14 @@ const SearchBar = () => {
 
   const handleSearch = (keyword?: string) => {
     isUserTypingRef.current = false; // Reset flag khi submit
+    isSearchingRef.current = true; // Đánh dấu đang trong quá trình search
     const trimmedValue = keyword || searchInput.trim();
     if (trimmedValue) {
       router.push(`/shop?search=${encodeURIComponent(trimmedValue)}`);
       setShowSuggestions(false);
     } else {
       router.push("/shop");
+      setShowSuggestions(false);
     }
   };
 
@@ -165,6 +173,8 @@ const SearchBar = () => {
 
   const handleSuggestionClick = (keyword: string) => {
     isUserTypingRef.current = false;
+    isSearchingRef.current = true; // Đánh dấu đang trong quá trình search
+    setShowSuggestions(false); // Đóng suggestions ngay lập tức
     setSearchInput(keyword);
     handleSearch(keyword);
   };
@@ -183,10 +193,12 @@ const SearchBar = () => {
             value={searchInput}
             onChange={(e) => {
               isUserTypingRef.current = true;
+              isSearchingRef.current = false; // Reset flag khi user bắt đầu gõ
               setSearchInput(e.target.value);
             }}
             onKeyDown={handleKeyDown}
             onFocus={() => {
+              isSearchingRef.current = false; // Reset flag khi focus vào input
               if (suggestions.length > 0 || suggestedProducts.length > 0) {
                 setShowSuggestions(true);
               }
@@ -197,6 +209,7 @@ const SearchBar = () => {
             <button
               onClick={() => {
                 isUserTypingRef.current = false;
+                isSearchingRef.current = false; // Reset flag khi xóa input
                 setSearchInput("");
                 setSuggestions([]);
                 setSuggestedProducts([]);
