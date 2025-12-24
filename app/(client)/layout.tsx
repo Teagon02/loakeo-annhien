@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import GoogleMap from "@/components/google_map/GoogleMap";
 import { ClerkProvider } from "@clerk/nextjs";
 import { viVN } from "@clerk/localizations";
 import RemoveCartAndWishlist from "@/components/RemoveCartAndWishlist";
@@ -22,6 +23,7 @@ export default function RootLayout({
         <RemoveCartAndWishlist />
         <Header />
         <main className="flex-1">{children}</main>
+        <GoogleMap />
         <Footer />
       </div>
     </ClerkProvider>
