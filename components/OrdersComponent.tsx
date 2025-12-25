@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { MY_ORDERS_QUERYResult } from "@/sanity.types";
+import { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 import {
   Tooltip,
@@ -13,13 +13,13 @@ import { Eye } from "lucide-react";
 import { TooltipContent } from "@/components/ui/tooltip";
 import OrderDetailDialog from "./OrderDetailDialog";
 
-const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERYResult }) => {
+const OrdersComponent = ({ orders }: { orders: MY_ORDERS_QUERY_RESULT }) => {
   const [selectedOrder, setSelectedOrder] = useState<
-    MY_ORDERS_QUERYResult[0] | null
+    MY_ORDERS_QUERY_RESULT[0] | null
   >(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const handleOrderClick = (order: MY_ORDERS_QUERYResult[0]) => {
+  const handleOrderClick = (order: MY_ORDERS_QUERY_RESULT[0]) => {
     setSelectedOrder(order);
     setDialogOpen(true);
   };
