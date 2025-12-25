@@ -2,14 +2,14 @@
 
 import React from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
-import { MY_ORDERS_QUERYResult } from "@/sanity.types";
+import { MY_ORDERS_QUERY_RESULT } from "@/sanity.types";
 import { format } from "date-fns";
 import PriceFormatter from "./PriceFormatter";
 import Image from "next/image";
 import { urlFor } from "@/sanity/lib/image";
 import { Separator } from "./ui/separator";
 
-type Order = MY_ORDERS_QUERYResult[0];
+type Order = MY_ORDERS_QUERY_RESULT[0];
 
 interface OrderDetailDialogProps {
   order: Order | null;
