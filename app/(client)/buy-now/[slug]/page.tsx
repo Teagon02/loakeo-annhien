@@ -13,6 +13,8 @@ import { Address } from "@/sanity.types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { toast } from "react-hot-toast";
 import { Minus, Plus, Zap, Eye } from "lucide-react";
 import { Title } from "@/components/ui/text";
@@ -28,6 +30,7 @@ const BuyNowPage = () => {
   const [selectedAddress, setSelectedAddress] =
     useState<Partial<Address> | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [paymentType, setPaymentType] = useState<"full" | "deposit">("full");
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -70,6 +73,19 @@ const BuyNowPage = () => {
     return basePrice * quantity;
   };
 
+  // Tính tiền cọc
+  const calculateDeposit = () => {
+    if (!product?.depositPrice) return 0;
+    return product.depositPrice * quantity;
+  };
+
+  const totalPrice = calculateTotal();
+  const depositAmount = calculateDeposit();
+  const hasDepositOption = depositAmount > 0;
+  const paymentAmount = paymentType === "deposit" ? depositAmount : totalPrice;
+  const remainingAmount =
+    paymentType === "deposit" ? totalPrice - depositAmount : 0;
+
   const handleCheckout = async () => {
     if (!product) {
       toast.error("Sản phẩm không hợp lệ");
@@ -106,6 +122,7 @@ const BuyNowPage = () => {
         address: addressWithGuestLabel as Address,
         userId: null,
         totalPrice: calculateTotal(),
+        paymentType: paymentType,
       });
 
       if (!checkout?.url) {
@@ -168,7 +185,11 @@ const BuyNowPage = () => {
                   {product.images && product.images.length > 0 && (
                     <div className="w-full md:w-48 h-48 border rounded-md overflow-hidden">
                       <Image
-                        src={urlFor(product.images[0]).width(384).quality(85).format('webp').url()}
+                        src={urlFor(product.images[0])
+                          .width(384)
+                          .quality(85)
+                          .format("webp")
+                          .url()}
                         alt={product.name || "Sản phẩm"}
                         width={200}
                         height={200}
@@ -277,8 +298,82 @@ const BuyNowPage = () => {
                 <div className="flex items-center justify-between font-semibold text-lg">
                   <span>Tổng tiền:</span>
                   <PriceFormatter
-                    amount={calculateTotal()}
+                    amount={totalPrice}
                     className="text-lg font-semibold text-black"
+                  />
+                </div>
+
+                {/* Chọn phương thức thanh toán */}
+                {hasDepositOption && (
+                  <>
+                    <Separator />
+                    <div className="space-y-3">
+                      <Label className="text-base font-semibold">
+                        Phương thức thanh toán:
+                      </Label>
+                      <RadioGroup
+                        value={paymentType}
+                        onValueChange={(value) =>
+                          setPaymentType(value as "full" | "deposit")
+                        }
+                      >
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="full" id="full-buy" />
+                          <Label
+                            htmlFor="full-buy"
+                            className="cursor-pointer flex-1"
+                          >
+                            Thanh toán hết:
+                            <PriceFormatter
+                              amount={totalPrice}
+                              className="font-semibold"
+                            />
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="deposit" id="deposit-buy" />
+                          <Label
+                            htmlFor="deposit-buy"
+                            className="cursor-pointer flex-1"
+                          >
+                            Cọc trước:
+                            <PriceFormatter
+                              amount={depositAmount}
+                              className="font-semibold"
+                            />
+                          </Label>
+                        </div>
+                      </RadioGroup>
+                    </div>
+                    {paymentType === "deposit" && (
+                      <div className="space-y-2 bg-blue-50 p-3 rounded-md">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">Tiền cọc:</span>
+                          <PriceFormatter
+                            amount={depositAmount}
+                            className="font-semibold"
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm">
+                            Cần thanh toán khi nhận hàng:
+                          </span>
+                          <PriceFormatter
+                            amount={remainingAmount}
+                            className="font-semibold"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    <Separator />
+                  </>
+                )}
+
+                <div className="flex items-center justify-between font-semibold text-lg bg-green-50 p-3 rounded-md">
+                  <span>Số tiền thanh toán: </span>
+                  <PriceFormatter
+                    amount={paymentAmount}
+                    className="text-lg font-semibold text-green-600"
                   />
                 </div>
               </CardContent>
@@ -303,7 +398,9 @@ const BuyNowPage = () => {
                 ? "Đang xử lý..."
                 : isOutOfStock
                   ? "Hết hàng"
-                  : "Thanh toán"}
+                  : paymentType === "deposit"
+                    ? "Thanh toán cọc"
+                    : "Thanh toán"}
             </Button>
           </div>
         </div>

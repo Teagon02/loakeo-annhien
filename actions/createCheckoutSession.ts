@@ -9,18 +9,42 @@ export async function createCheckoutSession({
   address,
   userId,
   totalPrice,
+  paymentType = "full",
 }: {
   items: any[]; // Grouped Items từ store
   address: Address;
   userId?: string | null;
   totalPrice: number;
+  paymentType?: "full" | "deposit";
 }) {
   try {
     // 1. Tạo mã đơn hàng (Số nguyên, duy nhất)
     // Dùng timestamp cắt gọn để đảm bảo unique và vừa vặn giới hạn int
     const orderCode = Number(String(Date.now()).slice(-10));
 
-    // 2. Chuẩn bị dữ liệu sản phẩm cho Sanity
+    // 2. Tính toán số tiền cọc và số tiền thanh toán
+    let depositAmount = 0;
+    let paymentAmount = totalPrice;
+    let remainingAmount = 0;
+
+    if (paymentType === "deposit") {
+      // Tính tổng tiền cọc từ các sản phẩm có depositPrice
+      depositAmount = items.reduce((total, item) => {
+        const productDepositPrice = item.product?.depositPrice ?? 0;
+        const quantity = item.quantity || 1;
+        return total + productDepositPrice * quantity;
+      }, 0);
+
+      // Nếu không có sản phẩm nào có depositPrice, không cho phép thanh toán cọc
+      if (depositAmount === 0) {
+        throw new Error("Không có sản phẩm nào hỗ trợ thanh toán cọc");
+      }
+
+      paymentAmount = depositAmount;
+      remainingAmount = totalPrice - depositAmount;
+    }
+
+    // 3. Chuẩn bị dữ liệu sản phẩm cho Sanity
     const sanityProducts = items.map((item) => ({
       _key: crypto.randomUUID(),
       product: {
@@ -41,13 +65,16 @@ export async function createCheckoutSession({
         : undefined,
     }));
 
-    // 3. Lưu đơn hàng vào Sanity (Trạng thái: PENDING)
+    // 4. Lưu đơn hàng vào Sanity (Trạng thái: PENDING)
     // Lưu ý: Đổi tên field addressLine, province... khớp với Address type của bạn
     const newOrder = await serverWriteClient.create({
       _type: "order",
       orderNumber: orderCode,
       status: "pending",
       totalPrice: totalPrice,
+      paymentType: paymentType,
+      depositAmount: paymentType === "deposit" ? depositAmount : 0,
+      remainingAmount: paymentType === "deposit" ? remainingAmount : 0,
       orderDate: new Date().toISOString(),
       clerkUserId: userId,
       shippingAddress: {
@@ -64,25 +91,45 @@ export async function createCheckoutSession({
 
     console.log("Created Sanity Order:", newOrder._id);
 
-    // 4. Chuẩn bị dữ liệu cho PayOS
+    // 5. Chuẩn bị dữ liệu cho PayOS
     // PayOS yêu cầu item có field: name, quantity, price
-    const payosItems: any[] = items.map((item) => ({
-      name: item.product?.name?.substring(0, 50) || "Sản phẩm", // PayOS giới hạn ký tự tên
-      quantity: item.quantity || 1,
-      price: item.product?.price || 0,
-    }));
+    // Nếu thanh toán cọc, cần điều chỉnh price của items để tổng bằng depositAmount
+    let payosItems: any[];
 
-    // Đảm bảo tổng tiền khớp (tránh lỗi làm tròn)
-    // PayOS tự tính tổng dựa trên items, nhưng ta có thể truyền amount tổng
-    // Tuy nhiên items price * quantity phải bằng amount
+    if (paymentType === "deposit") {
+      // Tạo PayOS items với giá cọc
+      payosItems = items.map((item) => {
+        const productDepositPrice = item.product?.depositPrice ?? 0;
+        const quantity = item.quantity || 1;
+
+        return {
+          name: `${item.product?.name?.substring(0, 40) || "Sản phẩm"} (Cọc)`,
+          quantity: quantity,
+          price: productDepositPrice, // Giá cọc cho mỗi sản phẩm
+        };
+      });
+    } else {
+      // Thanh toán đủ
+      payosItems = items.map((item) => ({
+        name: item.product?.name?.substring(0, 50) || "Sản phẩm",
+        quantity: item.quantity || 1,
+        price: item.product?.price || 0,
+      }));
+    }
 
     const YOUR_DOMAIN =
       process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
+    // PayOS yêu cầu description tối đa 25 ký tự
+    const description =
+      paymentType === "deposit"
+        ? `Coc DH ${orderCode}`.substring(0, 25)
+        : `DH ${orderCode}`.substring(0, 25);
+
     const paymentBody = {
       orderCode: orderCode,
-      amount: totalPrice,
-      description: `Don hang ${orderCode}`,
+      amount: paymentAmount, // Số tiền thực tế thanh toán (full hoặc deposit)
+      description: description,
       items: payosItems,
       returnUrl: `${YOUR_DOMAIN}/success?orderCode=${orderCode}`, // Trang thành công
       cancelUrl: `${YOUR_DOMAIN}/cart`, // Quay lại giỏ hàng nếu hủy

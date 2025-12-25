@@ -56,6 +56,7 @@ const CartPage = () => {
   const { user } = useUser();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+  const [paymentType, setPaymentType] = useState<"full" | "deposit">("full");
 
   const fetchAddresses = useCallback(async () => {
     if (!user?.id) return;
@@ -86,6 +87,18 @@ const CartPage = () => {
     }
   }, [isSignedIn, user, fetchAddresses]);
 
+  // Tính tổng tiền cọc có thể
+  const getTotalDepositAmount = () => {
+    return groupedItems.reduce((total, item) => {
+      const productDepositPrice = item.product?.depositPrice ?? 0;
+      const quantity = item.quantity || 1;
+      return total + productDepositPrice * quantity;
+    }, 0);
+  };
+
+  const totalDepositAmount = getTotalDepositAmount();
+  const hasDepositOption = totalDepositAmount > 0;
+
   const handleCheckout = async () => {
     if (!groupedItems?.length) {
       toast.error("Giỏ hàng trống, không thể thanh toán.");
@@ -105,6 +118,7 @@ const CartPage = () => {
         address: selectedAddress,
         userId: user?.id as string,
         totalPrice: getTotalPrice(),
+        paymentType: paymentType,
       });
       if (checkoutUrl) {
         window.location.href = checkoutUrl.url;
@@ -275,37 +289,117 @@ const CartPage = () => {
   );
 
   // Render order summary (reusable)
-  const renderOrderSummary = (className?: string) => (
-    <div className={className}>
-      <h2 className="text-xl font-semibold mb-4">Tóm tắt đơn hàng</h2>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <span>Tạm tính: </span>
-          <PriceFormatter amount={getSubTotalPrice()} />
+  const renderOrderSummary = (className?: string) => {
+    const totalPrice = getTotalPrice();
+    const paymentAmount =
+      paymentType === "deposit" ? totalDepositAmount : totalPrice;
+    const remainingAmount =
+      paymentType === "deposit" ? totalPrice - totalDepositAmount : 0;
+
+    return (
+      <div className={className}>
+        <h2 className="text-xl font-semibold mb-4">Tóm tắt đơn hàng</h2>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <span>Tạm tính: </span>
+            <PriceFormatter amount={getSubTotalPrice()} />
+          </div>
+          <div className="flex items-center justify-between">
+            <span>Giảm giá: </span>
+            <PriceFormatter amount={getSubTotalPrice() - getTotalPrice()} />
+          </div>
+          <Separator />
+          <div className="flex items-center justify-between font-semibold text-lg">
+            <span>Tổng tiền: </span>
+            <PriceFormatter
+              amount={totalPrice}
+              className="text-lg font-semibold text-black"
+            />
+          </div>
+
+          {/* Chọn phương thức thanh toán */}
+          {hasDepositOption && (
+            <>
+              <Separator />
+              <div className="space-y-3">
+                <Label className="text-base font-semibold">
+                  Phương thức thanh toán:
+                </Label>
+                <RadioGroup
+                  value={paymentType}
+                  onValueChange={(value) =>
+                    setPaymentType(value as "full" | "deposit")
+                  }
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="full" id="full" />
+                    <Label htmlFor="full" className="cursor-pointer flex-1">
+                      Thanh toán hết:
+                      <PriceFormatter
+                        amount={totalPrice}
+                        className="font-semibold"
+                      />
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="deposit" id="deposit" />
+                    <Label htmlFor="deposit" className="cursor-pointer flex-1">
+                      Cọc trước:
+                      <PriceFormatter
+                        amount={totalDepositAmount}
+                        className="font-semibold"
+                      />
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              {paymentType === "deposit" && (
+                <div className="space-y-2 bg-blue-50 p-3 rounded-md">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">Tiền cọc:</span>
+                    <PriceFormatter
+                      amount={totalDepositAmount}
+                      className="font-semibold"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm">
+                      Cần thanh toán khi nhận hàng:
+                    </span>
+                    <PriceFormatter
+                      amount={remainingAmount}
+                      className="font-semibold"
+                    />
+                  </div>
+                </div>
+              )}
+              <Separator />
+            </>
+          )}
+
+          <div className="flex items-center justify-between font-semibold text-lg bg-green-50 p-3 rounded-md">
+            <span>Số tiền thanh toán: </span>
+            <PriceFormatter
+              amount={paymentAmount}
+              className="text-lg font-semibold text-green-600"
+            />
+          </div>
+          <Button
+            className="w-full rounded-full font-semibold -tracking-wide hoverEffect"
+            size="lg"
+            disabled={loading || !selectedAddress}
+            onClick={handleCheckout}
+          >
+            {loading
+              ? "Đang xử lý..."
+              : paymentType === "deposit"
+                ? "Thanh toán cọc"
+                : "Thanh toán"}
+          </Button>
         </div>
-        <div className="flex items-center justify-between">
-          <span>Giảm giá: </span>
-          <PriceFormatter amount={getSubTotalPrice() - getTotalPrice()} />
-        </div>
-        <Separator />
-        <div className="flex items-center justify-between font-semibold text-lg">
-          <span>Tổng tiền: </span>
-          <PriceFormatter
-            amount={useStore.getState().getTotalPrice()}
-            className="text-lg font-semibold text-black"
-          />
-        </div>
-        <Button
-          className="w-full rounded-full font-semibold -tracking-wide hoverEffect"
-          size="lg"
-          disabled={loading || !selectedAddress}
-          onClick={handleCheckout}
-        >
-          {loading ? "Đang xử lý..." : "Thanh toán"}
-        </Button>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Render address section for signed in users
   const renderSignedInAddress = () => (

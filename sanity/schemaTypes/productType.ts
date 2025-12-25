@@ -39,9 +39,15 @@ export const productType = defineType({
     }),
     defineField({
       name: "price",
-      title: "Giá",
+      title: "Giá gốc",
       type: "number",
       validation: (Rule) => Rule.required().min(0),
+    }),
+    defineField({
+      name: "depositPrice",
+      title: "Cọc trước",
+      type: "number",
+      validation: (Rule) => Rule.min(0),
     }),
     defineField({
       name: "linkYoutube",
@@ -87,16 +93,9 @@ export const productType = defineType({
         list: [
           { title: "Loa kéo", value: "loa-keo" },
           { title: "Linh kiện lắp ráp", value: "linh-kien-lap-rap" },
-          { title: "Phụ kiện & Thay thế", value: "phu-kien-thay-the" },
+          { title: "Phụ kiện", value: "phu-kien" },
         ],
       },
-    }),
-    defineField({
-      name: "isFeatured",
-      title: "Sản phẩm nổi bật",
-      type: "boolean",
-      description: "Bật/Tắt sản phẩm nổi bật",
-      initialValue: false,
     }),
   ],
   preview: {

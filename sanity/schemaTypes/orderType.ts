@@ -43,11 +43,43 @@ export const orderType = defineType({
     }),
     defineField({
       name: "totalPrice",
-      title: "Tổng thu (VNĐ)",
+      title: "Tổng giá trị đơn hàng (VNĐ)",
       type: "number",
       group: "main",
       readOnly: true,
       validation: (Rule) => Rule.required(),
+      description: "Tổng giá trị đơn hàng",
+    }),
+    defineField({
+      name: "paymentType",
+      title: "Loại thanh toán",
+      type: "string",
+      group: "main",
+      options: {
+        list: [
+          { title: "Thanh toán đủ", value: "full" },
+          { title: "Cọc trước", value: "deposit" },
+        ],
+        layout: "radio",
+      },
+      readOnly: true,
+      initialValue: "full",
+    }),
+    defineField({
+      name: "depositAmount",
+      title: "Số tiền đã cọc (VNĐ)",
+      type: "number",
+      group: "main",
+      readOnly: true,
+      description: "Số tiền khách hàng đã cọc",
+    }),
+    defineField({
+      name: "remainingAmount",
+      title: "Số tiền còn lại (VNĐ)",
+      type: "number",
+      group: "main",
+      readOnly: true,
+      description: "Số tiền còn lại cần thanh toán",
     }),
     defineField({
       name: "orderDate",
@@ -227,7 +259,7 @@ export const orderType = defineType({
 
       return {
         title: `${statusIcons[status] || "📦"} ${customerInfo} ${phoneNumber}`,
-        subtitle: `#${orderId} | ${amount?.toLocaleString("vi-VN")}đ`,
+        subtitle: `${orderId}`,
         media: MapPinIcon, // Icon xe tải cho đúng tính chất
       };
     },
