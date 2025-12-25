@@ -1333,6 +1333,37 @@
         },
         "optional": true
       },
+      "paymentType": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "union",
+          "of": [
+            {
+              "type": "string",
+              "value": "full"
+            },
+            {
+              "type": "string",
+              "value": "deposit"
+            }
+          ]
+        },
+        "optional": true
+      },
+      "depositAmount": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
+        },
+        "optional": true
+      },
+      "remainingAmount": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
+        },
+        "optional": true
+      },
       "orderDate": {
         "type": "objectAttribute",
         "value": {
@@ -1711,6 +1742,13 @@
         },
         "optional": true
       },
+      "depositPrice": {
+        "type": "objectAttribute",
+        "value": {
+          "type": "number"
+        },
+        "optional": true
+      },
       "linkYoutube": {
         "type": "objectAttribute",
         "value": {
@@ -1812,16 +1850,9 @@
             },
             {
               "type": "string",
-              "value": "phu-kien-thay-the"
+              "value": "phu-kien"
             }
           ]
-        },
-        "optional": true
-      },
-      "isFeatured": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "boolean"
         },
         "optional": true
       }

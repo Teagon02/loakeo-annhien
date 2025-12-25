@@ -8,6 +8,7 @@ import { Flame, StarIcon, ShoppingCart } from "lucide-react";
 import AddToWishList from "./AddToWishList";
 import { Title } from "./ui/text";
 import PriceView from "./PriceView";
+import PriceFormatter from "./PriceFormatter";
 import AddToCartButton from "./AddToCartButton";
 import { useAuth } from "@clerk/nextjs";
 import { SignInButton } from "@clerk/nextjs";
@@ -72,6 +73,18 @@ const ProductCard = ({ product }: { product: Product }) => {
               className="text-shop_orange/50 group-hover:text-shop_orange hoverEffect"
             />
           </Link>
+        )}
+        {/* Tem cọc trước */}
+        {product?.depositPrice && product.depositPrice > 0 && (
+          <div className="absolute bottom-2 left-2 z-10 bg-blue-500/90 text-white px-2 py-1 rounded-md shadow-lg border border-blue-400/50 hoverEffect flex items-center gap-1">
+            <span className="text-xs font-semibold whitespace-nowrap">
+              Cọc trước:
+            </span>
+            <PriceFormatter
+              amount={product.depositPrice}
+              className="text-xs text-white font-bold"
+            />
+          </div>
         )}
       </div>
       <div className="p-3 flex flex-col gap-2">

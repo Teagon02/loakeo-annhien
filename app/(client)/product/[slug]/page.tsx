@@ -4,6 +4,7 @@ import Container from "@/components/Container";
 import ImageView from "@/components/ImageView";
 import { StarIcon } from "lucide-react";
 import PriceView from "@/components/PriceView";
+import PriceFormatter from "@/components/PriceFormatter";
 import AddToCartButton from "@/components/AddToCartButton";
 import FavoriteButton from "@/components/FavoriteButton";
 import { CornerDownLeft, Truck, PlayCircle } from "lucide-react";
@@ -135,7 +136,16 @@ const SingleProductPage = async ({
                 </span>
               ) : null}
             </div>
-            <span className="inline-flex w-fit items-center gap-1 rounded-full bg-linear-to-r from-shop_dark_green/80 to-shop_btn_dark_green/80 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+            {product?.depositPrice && product.depositPrice > 0 && (
+              <div className="flex items-center gap-2 bg-blue-400 text-white rounded-full px-3 py-1 w-fit">
+                <span className="text-xs font-semibold">Cọc trước:</span>
+                <PriceFormatter
+                  amount={product.depositPrice}
+                  className="text-xs font-semibold text-white"
+                />
+              </div>
+            )}
+            <span className="inline-flex w-fit items-center gap-1 rounded-full bg-orange-400 px-3 py-1 text-xs font-semibold text-white shadow-sm">
               Đã bao gồm phí vận chuyển
             </span>
             <p
