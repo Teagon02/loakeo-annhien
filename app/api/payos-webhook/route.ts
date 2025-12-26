@@ -89,6 +89,9 @@ export async function POST(req: NextRequest) {
         _id, 
         clerkUserId, 
         totalPrice,
+        paymentType,
+        depositAmount,
+        remainingAmount,
         shippingAddress,
         products[]{
           product,
@@ -145,6 +148,9 @@ export async function POST(req: NextRequest) {
               ),
               transactionCode: transactionRef,
               transactionDateTime: transactionDateTime,
+              paymentType: order.paymentType,
+              depositAmount: order.depositAmount,
+              remainingAmount: order.remainingAmount,
             });
           } catch (error) {
             console.error("Lỗi gửi thông báo Telegram đơn hàng:", error);

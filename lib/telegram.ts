@@ -85,6 +85,9 @@ export async function sendNewOrderNotification(orderData: {
   }>;
   transactionCode?: string;
   transactionDateTime?: string;
+  paymentType?: "full" | "deposit";
+  depositAmount?: number;
+  remainingAmount?: number;
 }): Promise<boolean> {
   const {
     orderNumber,
@@ -95,13 +98,24 @@ export async function sendNewOrderNotification(orderData: {
     products,
     transactionCode,
     transactionDateTime,
+    paymentType,
+    depositAmount,
+    remainingAmount,
   } = orderData;
 
   let message = `<b>🆕 ĐƠN HÀNG MỚI</b>\n\n`;
   message += `<b>Mã đơn:</b> ${orderNumber}\n`;
-  message += `<b>Tổng tiền:</b> ${formatCurrency(totalPrice)}\n\n`;
+  message += `<b>Loại thanh toán:</b> ${paymentType === "deposit" ? "Cọc trước" : "Thanh toán hết"}\n`;
+  message += `<b>Tổng tiền:</b> ${formatCurrency(totalPrice)}\n`;
 
-  message += `<b>👤 Khách hàng:</b>\n`;
+  // Hiển thị thông tin cọc nếu khách hàng chọn cọc trước
+  if (paymentType === "deposit" && depositAmount && remainingAmount) {
+    // message += `\n<b>💰 Thông tin thanh toán:</b>\n`;
+    message += `<b>Số tiền đã cọc:</b> ${formatCurrency(depositAmount)}\n`;
+    message += `<b style="color: red">Số tiền cần thanh toán:</b> ${formatCurrency(remainingAmount)}\n`;
+  }
+
+  message += `\n<b>👤 Khách hàng:</b>\n`;
   message += `Tên: ${customerName}\n`;
   message += `SĐT: ${customerPhone}\n`;
   message += `Địa chỉ: ${shippingAddress}\n\n`;

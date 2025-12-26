@@ -11,7 +11,8 @@ export const dynamic = "force-dynamic";
  * API Route để test Telegram Bot
  *
  * GET /api/test-telegram?type=simple - Test gửi tin nhắn đơn giản
- * GET /api/test-telegram?type=order - Test thông báo đơn hàng mới
+ * GET /api/test-telegram?type=order - Test thông báo đơn hàng mới (thanh toán đủ)
+ * GET /api/test-telegram?type=order-deposit - Test thông báo đơn hàng mới (cọc trước)
  * GET /api/test-telegram?type=stock - Test cảnh báo tồn kho thấp
  */
 export async function GET(request: NextRequest) {
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
       }
 
       case "order": {
-        // Test thông báo đơn hàng mới
+        // Test thông báo đơn hàng mới (thanh toán đủ)
         const testOrderData = {
           orderNumber: 9999999999,
           totalPrice: 1500000,
@@ -61,15 +62,50 @@ export async function GET(request: NextRequest) {
           ],
           transactionCode: "TEST123456",
           transactionDateTime: new Date().toLocaleString("vi-VN"),
+          paymentType: "full" as const,
         };
 
         const success = await sendNewOrderNotification(testOrderData);
         return NextResponse.json({
           success,
           message: success
-            ? "Đã gửi thông báo đơn hàng test thành công! Kiểm tra Telegram của bạn."
+            ? "Đã gửi thông báo đơn hàng test (thanh toán đủ) thành công! Kiểm tra Telegram của bạn."
             : "Không thể gửi thông báo đơn hàng. Kiểm tra lại cấu hình Telegram.",
           type: "order",
+          testData: testOrderData,
+        });
+      }
+
+      case "order-deposit": {
+        // Test thông báo đơn hàng mới (cọc trước)
+        const testOrderData = {
+          orderNumber: 8888888888,
+          totalPrice: 2000000,
+          customerName: "Trần Thị Test Cọc",
+          customerPhone: "0987654321",
+          shippingAddress:
+            "456 Đường Test Cọc, Phường Test, Quận Test, TP. Hồ Chí Minh",
+          products: [
+            {
+              name: "Loa Kéo Cao Cấp",
+              quantity: 1,
+              price: 2000000,
+            },
+          ],
+          transactionCode: "TESTDEPOSIT789",
+          transactionDateTime: new Date().toLocaleString("vi-VN"),
+          paymentType: "deposit" as const,
+          depositAmount: 500000, // Số tiền đã cọc
+          remainingAmount: 1500000, // Số tiền còn lại
+        };
+
+        const success = await sendNewOrderNotification(testOrderData);
+        return NextResponse.json({
+          success,
+          message: success
+            ? "Đã gửi thông báo đơn hàng test (cọc trước) thành công! Kiểm tra Telegram của bạn - sẽ có thông tin số tiền đã cọc và số tiền còn lại."
+            : "Không thể gửi thông báo đơn hàng. Kiểm tra lại cấu hình Telegram.",
+          type: "order-deposit",
           testData: testOrderData,
         });
       }
@@ -119,10 +155,12 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(
           {
             success: false,
-            message: "Invalid type. Use: simple, order, stock, or debug",
+            message:
+              "Invalid type. Use: simple, order, order-deposit, stock, or debug",
             examples: {
               simple: "/api/test-telegram?type=simple",
               order: "/api/test-telegram?type=order",
+              "order-deposit": "/api/test-telegram?type=order-deposit",
               stock: "/api/test-telegram?type=stock",
               debug: "/api/test-telegram?type=debug",
             },
