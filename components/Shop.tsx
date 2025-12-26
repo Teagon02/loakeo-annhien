@@ -44,7 +44,7 @@ const Shop = ({ categories }: Props) => {
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // Số sản phẩm mỗi trang
+  const itemsPerPage = 20; // Số sản phẩm mỗi trang
   // State tạm thời cho filter trong dialog
   const [tempSelectedCategory, setTempSelectedCategory] = useState<
     string | null
