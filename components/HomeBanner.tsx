@@ -49,7 +49,7 @@ const HomeBanner = () => {
               <div className="relative shrink-0">
                 <Logo
                   className="w-auto h-8 sm:h-12 md:h-16 lg:h-18 xl:h-22"
-                  imageClassName="h-8 sm:h-12 md:h-16 lg:h-18 xl:h-30 w-auto drop-shadow-lg"
+                  imageClassName="h-24 sm:h-28 md:h-32 lg:h-36 xl:h-40 w-auto drop-shadow-lg"
                 />
               </div>
               <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl 2xl:text-4xl font-black text-shop_dark_green leading-tight tracking-tight text-center sm:text-left min-w-0 flex-1 -ml-1 sm:ml-0">

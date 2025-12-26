@@ -80,6 +80,40 @@ const ProductGrid = () => {
     setCurrentPage(1);
   }, [selectedTab]);
 
+  // Scroll window về đầu khi chuyển trang
+  useEffect(() => {
+    const scrollToTop = () => {
+      // Scroll window về đầu - hỗ trợ tốt trên cả desktop và mobile
+      if (window.scrollTo) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      // Fallback cho các trình duyệt cũ
+      if (document.documentElement) {
+        document.documentElement.scrollTop = 0;
+      }
+      if (document.body) {
+        document.body.scrollTop = 0;
+      }
+    };
+
+    // Scroll ngay khi trang thay đổi
+    scrollToTop();
+
+    // Scroll lại sau khi products được render (nếu đang loading)
+    if (loading) {
+      const timer = setTimeout(() => {
+        scrollToTop();
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      // Nếu không loading, scroll sau một chút để đảm bảo DOM đã render
+      const timer = setTimeout(() => {
+        scrollToTop();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage, loading]);
+
   // Tính tổng số trang dựa trên totalCount
   const totalPages = useMemo(() => {
     return Math.ceil(totalCount / itemsPerPage);

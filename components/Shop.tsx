@@ -1,5 +1,11 @@
 "use client";
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+} from "react";
 import { Category, Product } from "@/sanity.types";
 import Container from "./Container";
 import { Title } from "./ui/text";
@@ -38,7 +44,7 @@ const Shop = ({ categories }: Props) => {
   const [selectedPrice, setSelectedPrice] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20; // Số sản phẩm mỗi trang
+  const itemsPerPage = 5; // Số sản phẩm mỗi trang
   // State tạm thời cho filter trong dialog
   const [tempSelectedCategory, setTempSelectedCategory] = useState<
     string | null
@@ -46,6 +52,8 @@ const Shop = ({ categories }: Props) => {
   const [tempSelectedPrice, setTempSelectedPrice] = useState<string | null>(
     null
   );
+  // Ref cho container scroll
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Khởi tạo temp state khi mở dialog
   useEffect(() => {
@@ -196,6 +204,40 @@ const Shop = ({ categories }: Props) => {
     fetchProducts();
   }, [fetchProducts]);
 
+  // Scroll window về đầu khi chuyển trang
+  useEffect(() => {
+    const scrollToTop = () => {
+      // Scroll window về đầu - hỗ trợ tốt trên cả desktop và mobile
+      if (window.scrollTo) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      // Fallback cho các trình duyệt cũ
+      if (document.documentElement) {
+        document.documentElement.scrollTop = 0;
+      }
+      if (document.body) {
+        document.body.scrollTop = 0;
+      }
+    };
+
+    // Scroll ngay khi trang thay đổi
+    scrollToTop();
+
+    // Scroll lại sau khi products được render (nếu đang loading)
+    if (loading) {
+      const timer = setTimeout(() => {
+        scrollToTop();
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      // Nếu không loading, scroll sau một chút để đảm bảo DOM đã render
+      const timer = setTimeout(() => {
+        scrollToTop();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage, loading]);
+
   // Tính tổng số trang dựa trên totalCount
   const totalPages = useMemo(() => {
     return Math.ceil(totalCount / itemsPerPage);
@@ -283,7 +325,10 @@ const Shop = ({ categories }: Props) => {
             />
           </div>
           <div className="flex-1 pt-5 flex flex-col">
-            <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide min-h-0">
+            <div
+              ref={scrollContainerRef}
+              className="flex-1 overflow-y-auto pr-2 scrollbar-hide min-h-0"
+            >
               {loading ? (
                 <div className="p-20 flex flex-col gap-2 items-center justify-center bg-white">
                   <Loader2 className="w-10 h-10 text-shop_dark_green animate-spin" />
