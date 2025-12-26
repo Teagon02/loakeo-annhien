@@ -132,11 +132,17 @@ export async function POST(req: NextRequest) {
               customerName: order.shippingAddress.fullName || "Khách hàng",
               customerPhone: order.shippingAddress.phone || "",
               shippingAddress: shippingAddress,
-              products: products.map((item: any) => ({
-                name: item.name || "Sản phẩm",
-                quantity: item.quantity || 0,
-                price: item.price || 0,
-              })),
+              products: products.map(
+                (item: {
+                  name?: string;
+                  quantity?: number;
+                  price?: number;
+                }) => ({
+                  name: item.name || "Sản phẩm",
+                  quantity: item.quantity || 0,
+                  price: item.price || 0,
+                })
+              ),
               transactionCode: transactionRef,
               transactionDateTime: transactionDateTime,
             });
