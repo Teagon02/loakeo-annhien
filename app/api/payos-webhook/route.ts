@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import payos from "@/lib/payos";
 import { serverWriteClient } from "@/sanity/lib/client";
+import { sendNewOrderNotification, sendLowStockWarning } from "@/lib/telegram";
 
 export const dynamic = "force-dynamic";
 
@@ -83,7 +84,19 @@ export async function POST(req: NextRequest) {
         transactionRef
       );
 
-      const query = `*[_type == "order" && orderNumber == $orderCode][0]{_id, clerkUserId, products}`;
+      // Lấy đầy đủ thông tin đơn hàng
+      const query = `*[_type == "order" && orderNumber == $orderCode][0]{
+        _id, 
+        clerkUserId, 
+        totalPrice,
+        shippingAddress,
+        products[]{
+          product,
+          name,
+          price,
+          quantity
+        }
+      }`;
       const order = await serverWriteClient.fetch(query, { orderCode });
       console.log("[DEBUG] order from Sanity:", order);
       const orderId = order?._id;
@@ -102,16 +115,48 @@ export async function POST(req: NextRequest) {
 
         console.log(`Đã cập nhật đơn hàng ${orderCode} thành công.`);
 
+        // Gửi thông báo đơn hàng mới qua Telegram
+        if (
+          order?.totalPrice &&
+          order?.shippingAddress &&
+          products.length > 0
+        ) {
+          try {
+            const shippingAddress =
+              order.shippingAddress.fullAddress ||
+              `${order.shippingAddress.address || ""}, ${order.shippingAddress.ward || ""}, ${order.shippingAddress.district || ""}, ${order.shippingAddress.city || ""}`.trim();
+
+            await sendNewOrderNotification({
+              orderNumber: orderCode,
+              totalPrice: order.totalPrice,
+              customerName: order.shippingAddress.fullName || "Khách hàng",
+              customerPhone: order.shippingAddress.phone || "",
+              shippingAddress: shippingAddress,
+              products: products.map((item: any) => ({
+                name: item.name || "Sản phẩm",
+                quantity: item.quantity || 0,
+                price: item.price || 0,
+              })),
+              transactionCode: transactionRef,
+              transactionDateTime: transactionDateTime,
+            });
+          } catch (error) {
+            console.error("Lỗi gửi thông báo Telegram đơn hàng:", error);
+            // Không throw error để không ảnh hưởng đến quá trình xử lý đơn hàng
+          }
+        }
+
         // Cập nhật tồn kho cho từng sản phẩm
         if (products && products.length > 0) {
           for (const item of products) {
-            const productRef = item?.product?._ref;
+            // product có thể là reference object với _ref hoặc object đã resolve
+            const productRef = item?.product?._ref || item?.product?._id;
             const quantity = item?.quantity || 0;
 
             if (productRef && quantity > 0) {
               try {
                 // Lấy thông tin sản phẩm hiện tại để có stock hiện tại
-                const productQuery = `*[_id == $productId][0]{_id, stock}`;
+                const productQuery = `*[_id == $productId][0]{_id, name, stock}`;
                 const product = await serverWriteClient.fetch(productQuery, {
                   productId: productRef,
                 });
@@ -128,6 +173,23 @@ export async function POST(req: NextRequest) {
                   console.log(
                     `Đã cập nhật tồn kho: Product ${productRef}, ${currentStock} -> ${newStock} (giảm ${quantity})`
                   );
+
+                  // Gửi cảnh báo nếu tồn kho xuống dưới 3
+                  if (newStock < 3) {
+                    try {
+                      await sendLowStockWarning({
+                        productId: productRef,
+                        productName: product.name || "Sản phẩm",
+                        currentStock: newStock,
+                      });
+                    } catch (error) {
+                      console.error(
+                        `Lỗi gửi cảnh báo tồn kho thấp cho sản phẩm ${productRef}:`,
+                        error
+                      );
+                      // Không throw error để không ảnh hưởng đến quá trình xử lý
+                    }
+                  }
                 } else {
                   console.warn(`Không tìm thấy sản phẩm với ID: ${productRef}`);
                 }

@@ -259,7 +259,7 @@ export const orderType = defineType({
 
       return {
         title: `${statusIcons[status] || "📦"} ${customerInfo} ${phoneNumber}`,
-        subtitle: `${orderId}`,
+        subtitle: `Mã đơn: ${orderId}`,
         media: MapPinIcon, // Icon xe tải cho đúng tính chất
       };
     },

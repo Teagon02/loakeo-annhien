@@ -103,13 +103,21 @@ export const productType = defineType({
       title: "name",
       media: "images.0.asset",
       price: "price",
+      stock: "stock",
     },
     prepare(selection) {
-      const { title, price, media } = selection;
+      const { title, price, media, stock } = selection;
+      const priceText = price
+        ? `${price.toLocaleString("vi-VN")} đ`
+        : "Liên hệ";
+      const stockText =
+        stock !== undefined && stock !== null
+          ? ` - Tồn kho: ${stock.toLocaleString("vi-VN")}`
+          : "";
       return {
         title: title,
         // Format giá tiền: 5000000 -> 5.000.000 đ
-        subtitle: price ? `${price.toLocaleString("vi-VN")} đ` : "Liên hệ",
+        subtitle: `${priceText}${stockText}`,
         media: media,
       };
     },
