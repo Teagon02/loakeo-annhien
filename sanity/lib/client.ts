@@ -16,3 +16,11 @@ export const serverWriteClient = createClient({
   useCdn: false, // Must be false for write operations
   token: process.env.SANITY_API_WRITE_TOKEN, // Server-side token (not exposed to client)
 });
+
+// Client without CDN for real-time data fetching (like addresses)
+export const clientNoCache = createClient({
+  projectId,
+  dataset,
+  apiVersion,
+  useCdn: false, // Disable CDN to get fresh data
+});

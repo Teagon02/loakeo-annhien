@@ -24,7 +24,7 @@ import PriceFormatter from "@/components/PriceFormatter";
 import QuantityButtons from "@/components/QuantityButtons";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { client } from "@/sanity/lib/client";
+import { client, clientNoCache } from "@/sanity/lib/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -58,28 +58,89 @@ const CartPage = () => {
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
   const [paymentType, setPaymentType] = useState<"full" | "deposit">("full");
 
-  const fetchAddresses = useCallback(async () => {
-    if (!user?.id) return;
+  // Optimistic update function for addresses
+  const updateAddressOptimistically = useCallback(
+    (action: "add" | "delete", address?: Address, addressId?: string) => {
+      if (action === "add" && address) {
+        setAddresses((prev) => {
+          // Check if address already exists to avoid duplicates
+          const exists = prev.some((addr) => addr._id === address._id);
+          if (exists) {
+            return prev;
+          }
+          // Add new address at the beginning (most recent first)
+          const updated = [address, ...prev];
+          // If it's set as default, select it and unset others
+          if (address.isDefault) {
+            setSelectedAddress(address);
+            // Update other addresses to not be default (in state only, backend already handled)
+            return updated.map((addr) =>
+              addr._id === address._id ? addr : { ...addr, isDefault: false }
+            );
+          }
+          return updated;
+        });
 
-    setLoading(true);
-    try {
-      const query = `*[_type == "address" && userId == $userId] | order(_createdAt desc)`;
-      const data = await client.fetch(query, { userId: user.id });
-      setAddresses(data);
-      const defautAddress = data.find((address: Address) => address.isDefault);
-      if (defautAddress) {
-        setSelectedAddress(defautAddress);
-      } else if (data.length > 0) {
-        setSelectedAddress(data[0]);
-      } else {
-        setSelectedAddress(null);
+        // Select the new address if it's default or if no address is currently selected
+        setSelectedAddress((current) => {
+          if (address.isDefault || !current) {
+            return address;
+          }
+          return current;
+        });
+      } else if (action === "delete" && addressId) {
+        setAddresses((prev) => {
+          const updated = prev.filter((addr) => addr._id !== addressId);
+          // If deleted address was selected, select the first available address
+          setSelectedAddress((current) => {
+            if (current?._id === addressId) {
+              return updated.length > 0 ? updated[0] : null;
+            }
+            return current;
+          });
+          return updated;
+        });
       }
-    } catch (error) {
-      console.error("Error fetching addresses:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.id]);
+    },
+    []
+  );
+
+  const fetchAddresses = useCallback(
+    async (newAddress?: Address) => {
+      if (!user?.id) return;
+
+      // If a new address is provided, add it immediately to the list
+      if (newAddress) {
+        updateAddressOptimistically("add", newAddress);
+        // Don't fetch again immediately - the new address is already in state
+        // This avoids cache issues and provides instant UI update
+        return; // Don't do the main fetch when we have a new address
+      }
+
+      setLoading(true);
+      try {
+        const query = `*[_type == "address" && userId == $userId] | order(_createdAt desc)`;
+        // Use clientNoCache to bypass CDN cache and get fresh data
+        const data = await clientNoCache.fetch(query, { userId: user.id });
+        setAddresses(data);
+        const defautAddress = data.find(
+          (address: Address) => address.isDefault
+        );
+        if (defautAddress) {
+          setSelectedAddress(defautAddress);
+        } else if (data.length > 0) {
+          setSelectedAddress(data[0]);
+        } else {
+          setSelectedAddress(null);
+        }
+      } catch (error) {
+        console.error("Error fetching addresses:", error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user?.id, updateAddressOptimistically]
+  );
 
   useEffect(() => {
     if (isSignedIn && user) {
@@ -422,30 +483,125 @@ const CartPage = () => {
                 if (addr) setSelectedAddress(addr);
               }}
             >
-              {addresses.map((address) => (
-                <div
-                  key={address._id}
-                  onClick={() => setSelectedAddress(address)}
-                  className={`flex items-center space-x-2 cursor-pointer ${selectedAddress?._id === address._id && "text-shop_dark_green"}`}
-                >
-                  <RadioGroupItem
-                    value={address._id?.toString() || ""}
-                    id={address._id?.toString() || ""}
-                  />
-                  <Label
-                    htmlFor={address._id?.toString() || ""}
-                    className="grid gap-1.5 flex-1 cursor-pointer"
+              {addresses.map((address) => {
+                const isSelected = selectedAddress?._id === address._id;
+                return (
+                  <div
+                    key={address._id}
+                    className={`flex items-center justify-between gap-2 p-2 rounded-md hover:bg-gray-50 ${
+                      isSelected && "bg-green-50"
+                    }`}
                   >
-                    <span>
-                      {address?.fullName} - {address?.phone}
-                    </span>
-                    <span>
-                      {address?.addressLine}, {address?.ward},{" "}
-                      {address?.district}, {address?.province}
-                    </span>
-                  </Label>
-                </div>
-              ))}
+                    <div
+                      onClick={() => setSelectedAddress(address)}
+                      className={`flex items-center space-x-2 cursor-pointer flex-1 ${
+                        isSelected && "text-shop_dark_green"
+                      }`}
+                    >
+                      <RadioGroupItem
+                        value={address._id?.toString() || ""}
+                        id={address._id?.toString() || ""}
+                      />
+                      <Label
+                        htmlFor={address._id?.toString() || ""}
+                        className="grid gap-1.5 flex-1 cursor-pointer"
+                      >
+                        <span>
+                          {address?.fullName} - {address?.phone}
+                        </span>
+                        <span>
+                          {address?.addressLine}, {address?.ward},{" "}
+                          {address?.district}, {address?.province}
+                        </span>
+                      </Label>
+                    </div>
+                    {!isSelected && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Xác nhận xóa địa chỉ
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Bạn có chắc chắn muốn xóa địa chỉ này? Hành động
+                              này không thể hoàn tác.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Hủy</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={async () => {
+                                const addressIdToDelete = address._id;
+
+                                // Optimistic update: remove from UI immediately
+                                updateAddressOptimistically(
+                                  "delete",
+                                  undefined,
+                                  addressIdToDelete
+                                );
+
+                                try {
+                                  const response = await fetch(
+                                    "/api/addresses",
+                                    {
+                                      method: "DELETE",
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                      },
+                                      body: JSON.stringify({
+                                        addressId: addressIdToDelete,
+                                      }),
+                                    }
+                                  );
+
+                                  const data = await response.json();
+
+                                  if (!response.ok) {
+                                    // Rollback on error: re-fetch to get correct state
+                                    fetchAddresses();
+                                    throw new Error(
+                                      data.error || "Failed to delete address"
+                                    );
+                                  }
+
+                                  toast.success(
+                                    data.message || "Địa chỉ đã được xóa"
+                                  );
+                                  // No need to fetch again - state already updated
+                                } catch (error) {
+                                  console.error(
+                                    "Error deleting address:",
+                                    error
+                                  );
+                                  toast.error(
+                                    error instanceof Error
+                                      ? error.message
+                                      : "Có lỗi xảy ra khi xóa địa chỉ"
+                                  );
+                                  // State will be corrected by fetchAddresses() above
+                                }
+                              }}
+                              className="bg-red-500 hover:bg-red-600"
+                            >
+                              Xóa
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
+                  </div>
+                );
+              })}
             </RadioGroup>
           ) : (
             <p className="text-sm text-gray-500 mb-4">
@@ -455,6 +611,7 @@ const CartPage = () => {
           <AddressFormDialog
             onAddressAdded={fetchAddresses}
             addresses={addresses}
+            maxAddresses={3}
           />
         </CardContent>
       </Card>

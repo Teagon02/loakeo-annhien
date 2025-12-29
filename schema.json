@@ -310,27 +310,6 @@
         },
         "optional": true
       },
-      "label": {
-        "type": "objectAttribute",
-        "value": {
-          "type": "union",
-          "of": [
-            {
-              "type": "string",
-              "value": "home"
-            },
-            {
-              "type": "string",
-              "value": "office"
-            },
-            {
-              "type": "string",
-              "value": "other"
-            }
-          ]
-        },
-        "optional": true
-      },
       "isDefault": {
         "type": "objectAttribute",
         "value": {

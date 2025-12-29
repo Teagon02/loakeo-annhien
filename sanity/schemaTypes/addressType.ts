@@ -76,19 +76,7 @@ export const addressType = defineType({
       rows: 2,
       validation: (Rule) => Rule.required(),
     }),
-    defineField({
-      name: "label",
-      title: "Loại địa chỉ",
-      type: "string",
-      options: {
-        list: [
-          { title: "Nhà riêng", value: "home" },
-          { title: "Văn phòng", value: "office" },
-          { title: "Khác", value: "other" },
-        ],
-      },
-      initialValue: "home",
-    }),
+
     defineField({
       name: "isDefault",
       title: "Đặt làm mặc định",

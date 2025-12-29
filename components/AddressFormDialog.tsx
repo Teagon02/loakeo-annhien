@@ -25,8 +25,9 @@ interface AddressWithUserId extends Address {
 }
 
 interface AddressFormDialogProps {
-  onAddressAdded: () => void;
+  onAddressAdded: (newAddress?: Address) => void;
   addresses?: AddressWithUserId[];
+  maxAddresses?: number;
 }
 
 interface AddressFormData {
@@ -40,7 +41,11 @@ interface AddressFormData {
   isDefault: boolean;
 }
 
-const AddressFormDialog = ({ onAddressAdded }: AddressFormDialogProps) => {
+const AddressFormDialog = ({
+  onAddressAdded,
+  addresses = [],
+  maxAddresses = 3,
+}: AddressFormDialogProps) => {
   const { user } = useUser();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -112,6 +117,12 @@ const AddressFormDialog = ({ onAddressAdded }: AddressFormDialogProps) => {
       return;
     }
 
+    // Kiểm tra giới hạn số lượng địa chỉ
+    if (addresses.length >= maxAddresses) {
+      toast.error(`Bạn chỉ có thể tạo tối đa ${maxAddresses} địa chỉ`);
+      return;
+    }
+
     if (!validateForm()) {
       return;
     }
@@ -157,8 +168,8 @@ const AddressFormDialog = ({ onAddressAdded }: AddressFormDialogProps) => {
         isDefault: false,
       });
 
-      // Refresh addresses list
-      onAddressAdded();
+      // Pass the new address to the callback for immediate update
+      onAddressAdded(data.address);
     } catch (error) {
       console.error("Error creating address:", error);
 
@@ -182,6 +193,11 @@ const AddressFormDialog = ({ onAddressAdded }: AddressFormDialogProps) => {
         toast.error("Số điện thoại không hợp lệ.");
       } else if (errorMessage.includes("Missing required")) {
         toast.error("Vui lòng điền đầy đủ thông tin bắt buộc.");
+      } else if (
+        errorMessage.includes("tối đa") ||
+        errorMessage.includes("maximum")
+      ) {
+        toast.error(errorMessage);
       } else {
         toast.error(`Lỗi: ${errorMessage}`);
       }
@@ -190,11 +206,19 @@ const AddressFormDialog = ({ onAddressAdded }: AddressFormDialogProps) => {
     }
   };
 
+  const canAddMore = addresses.length < maxAddresses;
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full mt-4">
-          Thêm địa chỉ mới
+        <Button
+          variant="outline"
+          className="w-full mt-4"
+          disabled={!canAddMore}
+        >
+          {canAddMore
+            ? "Thêm địa chỉ mới"
+            : `Tạo tối đa ${maxAddresses} địa chỉ`}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -295,22 +319,6 @@ const AddressFormDialog = ({ onAddressAdded }: AddressFormDialogProps) => {
               rows={3}
               required
             />
-          </div>
-
-          {/* Loại địa chỉ */}
-          <div className="space-y-2">
-            <Label htmlFor="label">Loại địa chỉ</Label>
-            <select
-              id="label"
-              name="label"
-              value={formData.label}
-              onChange={handleInputChange}
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-            >
-              <option value="home">Nhà riêng</option>
-              <option value="office">Văn phòng</option>
-              <option value="other">Khác</option>
-            </select>
           </div>
 
           {/* Đặt làm mặc định */}

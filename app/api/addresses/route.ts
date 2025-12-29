@@ -65,6 +65,19 @@ export async function POST(request: NextRequest) {
       user.emailAddresses[0]?.emailAddress ||
       "";
 
+    // Kiểm tra giới hạn tối đa 3 địa chỉ
+    const countQuery = `count(*[_type == "address" && userId == $userId])`;
+    const addressCount = await serverWriteClient.fetch(countQuery, {
+      userId: userId,
+    });
+
+    if (addressCount >= 3) {
+      return NextResponse.json(
+        { error: "Bạn chỉ có thể tạo tối đa 3 địa chỉ" },
+        { status: 400 }
+      );
+    }
+
     // Nếu đặt làm mặc định, cần bỏ mặc định của các địa chỉ khác
     if (body.isDefault) {
       try {
@@ -140,6 +153,70 @@ export async function POST(request: NextRequest) {
   }
 }
 
+export async function DELETE(request: NextRequest) {
+  try {
+    // Xác thực người dùng
+    const { userId } = await auth();
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized. Please sign in." },
+        { status: 401 }
+      );
+    }
+
+    // Parse request body để lấy addressId
+    const body = await request.json();
+    const { addressId } = body;
+
+    if (!addressId) {
+      return NextResponse.json(
+        { error: "Address ID is required" },
+        { status: 400 }
+      );
+    }
+
+    // Kiểm tra địa chỉ có thuộc về user này không
+    const query = `*[_type == "address" && _id == $addressId && userId == $userId][0]`;
+    const address = await serverWriteClient.fetch(query, {
+      addressId,
+      userId,
+    });
+
+    if (!address) {
+      return NextResponse.json(
+        { error: "Address not found or unauthorized" },
+        { status: 404 }
+      );
+    }
+
+    // Xóa địa chỉ
+    await serverWriteClient.delete(addressId);
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Địa chỉ đã được xóa thành công",
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting address:", error);
+
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message || "Failed to delete address" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 // OPTIONS handler for CORS
 export async function OPTIONS() {
   const allowedOrigin =
@@ -149,7 +226,7 @@ export async function OPTIONS() {
     status: 200,
     headers: {
       "Access-Control-Allow-Origin": allowedOrigin,
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "POST, DELETE, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Authorization",
       "Access-Control-Allow-Credentials": "true",
     },

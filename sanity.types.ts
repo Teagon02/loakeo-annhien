@@ -66,7 +66,6 @@ export type Address = {
   district?: string;
   ward?: string;
   addressLine?: string;
-  label?: "home" | "office" | "other";
   isDefault?: boolean;
   createAt?: string;
 };
