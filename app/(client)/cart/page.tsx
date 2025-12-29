@@ -24,7 +24,7 @@ import PriceFormatter from "@/components/PriceFormatter";
 import QuantityButtons from "@/components/QuantityButtons";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { client, clientNoCache } from "@/sanity/lib/client";
+import { clientNoCache } from "@/sanity/lib/client";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";

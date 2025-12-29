@@ -9,7 +9,6 @@ interface AddressRequestBody {
   district: string;
   ward: string;
   addressLine: string;
-  label: "home" | "office" | "other";
   isDefault: boolean;
 }
 
@@ -111,7 +110,6 @@ export async function POST(request: NextRequest) {
       district: body.district.trim(),
       ward: body.ward.trim(),
       addressLine: body.addressLine.trim(),
-      label: body.label || "home",
       isDefault: body.isDefault || false,
     };
 

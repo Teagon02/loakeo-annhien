@@ -37,7 +37,6 @@ interface AddressFormData {
   district: string;
   ward: string;
   addressLine: string;
-  label: "home" | "office" | "other";
   isDefault: boolean;
 }
 
@@ -56,7 +55,6 @@ const AddressFormDialog = ({
     district: "",
     ward: "",
     addressLine: "",
-    label: "home",
     isDefault: false,
   });
 
@@ -142,7 +140,6 @@ const AddressFormDialog = ({
           district: formData.district.trim(),
           ward: formData.ward.trim(),
           addressLine: formData.addressLine.trim(),
-          label: formData.label,
           isDefault: formData.isDefault,
         }),
       });

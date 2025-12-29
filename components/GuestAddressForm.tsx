@@ -95,7 +95,6 @@ const GuestAddressForm = ({
       district: formData.district.trim(),
       ward: formData.ward.trim(),
       addressLine: formData.addressLine.trim(),
-      label: "home",
       isDefault: false,
     };
 
