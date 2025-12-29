@@ -161,7 +161,6 @@ const AddressFormDialog = ({
         district: "",
         ward: "",
         addressLine: "",
-        label: "home",
         isDefault: false,
       });
 

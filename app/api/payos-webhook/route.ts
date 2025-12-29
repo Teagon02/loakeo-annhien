@@ -52,7 +52,6 @@ type PayOSWebhookData = {
 };
 
 export async function POST(req: NextRequest) {
-  console.log("[DEBUG] Code đã CHẠY VÀO webhook file route.ts thành công!");
   try {
     const body = await req.json();
 
@@ -60,8 +59,6 @@ export async function POST(req: NextRequest) {
     const webhookData = (await payos.webhooks.verify(
       body
     )) as unknown as PayOSWebhookData;
-
-    console.log("Nhận Webhook từ PayOS:", webhookData);
 
     // Một số webhook trả code ở top-level, một số nằm trong data
     const code = webhookData.code || webhookData.data?.code;
@@ -77,13 +74,6 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
-      console.log(
-        "[DEBUG] orderCode:",
-        orderCode,
-        "transactionRef:",
-        transactionRef
-      );
-
       // Lấy đầy đủ thông tin đơn hàng
       const query = `*[_type == "order" && orderNumber == $orderCode][0]{
         _id, 
@@ -101,7 +91,6 @@ export async function POST(req: NextRequest) {
         }
       }`;
       const order = await serverWriteClient.fetch(query, { orderCode });
-      console.log("[DEBUG] order from Sanity:", order);
       const orderId = order?._id;
       const clerkUserId = order?.clerkUserId;
       const products = order?.products || [];
@@ -115,8 +104,6 @@ export async function POST(req: NextRequest) {
             transactionDateTime: transactionDateTime || "",
           })
           .commit();
-
-        console.log(`Đã cập nhật đơn hàng ${orderCode} thành công.`);
 
         // Gửi thông báo đơn hàng mới qua Telegram
         if (
@@ -182,10 +169,6 @@ export async function POST(req: NextRequest) {
                     .set({ stock: newStock })
                     .commit();
 
-                  console.log(
-                    `Đã cập nhật tồn kho: Product ${productRef}, ${currentStock} -> ${newStock} (giảm ${quantity})`
-                  );
-
                   // Gửi cảnh báo nếu tồn kho xuống dưới 3
                   if (newStock < 3) {
                     try {
@@ -224,11 +207,6 @@ export async function POST(req: NextRequest) {
           });
           if (cartId) {
             await serverWriteClient.delete(cartId);
-            console.log(
-              `Đã xoá giỏ hàng userId=${clerkUserId}, cartId=${cartId}`
-            );
-          } else {
-            console.log(`Không có giỏ hàng cho userId=${clerkUserId} để xoá.`);
           }
         }
       } else {
