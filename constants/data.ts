@@ -98,8 +98,8 @@ export const productType = [
     value: "linh-kien-lap-rap",
   },
   {
-    title: "Phụ kiện & Thay thế",
-    value: "phu-kien-thay-the",
+    title: "Phụ kiện",
+    value: "phu-kien",
   },
   { title: "Khác", value: "khac" },
 ];
