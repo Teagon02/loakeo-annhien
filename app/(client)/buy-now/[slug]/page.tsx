@@ -318,19 +318,6 @@ const BuyNowPage = () => {
                         }
                       >
                         <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="full" id="full-buy" />
-                          <Label
-                            htmlFor="full-buy"
-                            className="cursor-pointer flex-1"
-                          >
-                            Thanh toán hết:
-                            <PriceFormatter
-                              amount={totalPrice}
-                              className="font-semibold"
-                            />
-                          </Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
                           <RadioGroupItem value="deposit" id="deposit-buy" />
                           <Label
                             htmlFor="deposit-buy"
@@ -339,6 +326,19 @@ const BuyNowPage = () => {
                             Cọc trước:
                             <PriceFormatter
                               amount={depositAmount}
+                              className="font-semibold"
+                            />
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <RadioGroupItem value="full" id="full-buy" />
+                          <Label
+                            htmlFor="full-buy"
+                            className="cursor-pointer flex-1"
+                          >
+                            Thanh toán hết:
+                            <PriceFormatter
+                              amount={totalPrice}
                               className="font-semibold"
                             />
                           </Label>
