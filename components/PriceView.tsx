@@ -20,7 +20,7 @@ const PriceView = ({ price, discount }: Props) => {
           />
         )}
         {discount ? (
-          <span className="text-sm font-bold text-red-500 border border-red-500/50 bg-red-100/50 px-1 rounded-full shrink-0">
+          <span className="text-xs font-bold text-red-500 border border-red-500/50 bg-red-100/50 px-1 rounded-full shrink-0">
             -{discount}%
           </span>
         ) : null}

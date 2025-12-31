@@ -130,11 +130,6 @@ const SingleProductPage = async ({
                 discount={product?.discount as number}
                 className="text-lg font-bold"
               />
-              {product?.discount ? (
-                <span className="text-xs font-semibold text-shop_orange border border-shop_orange/60 px-2 py-0.5 rounded-full shrink-0">
-                  Giảm -{product.discount}%
-                </span>
-              ) : null}
             </div>
             {product?.depositPrice && product.depositPrice > 0 && (
               <div className="flex items-center gap-2 bg-blue-400 text-white rounded-full px-3 py-1 w-fit">
@@ -146,7 +141,7 @@ const SingleProductPage = async ({
               </div>
             )}
             <span className="inline-flex w-fit items-center gap-1 rounded-full bg-orange-400 px-3 py-1 text-xs font-semibold text-white shadow-sm">
-              Đã bao gồm phí vận chuyển
+              Giá đã bao gồm phí vận chuyển
             </span>
             <p
               className={`block w-fit px-4 py-1.5 text-sm text-center font-semibold rounded-lg ${product?.stock === 0 ? "bg-red-100 text-red-600" : "text-green-600 bg-green-100"}`}

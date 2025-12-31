@@ -56,7 +56,7 @@ const CartPage = () => {
   const { user } = useUser();
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
-  const [paymentType, setPaymentType] = useState<"full" | "deposit">("full");
+  const [paymentType, setPaymentType] = useState<"full" | "deposit">("deposit");
 
   // Optimistic update function for addresses
   const updateAddressOptimistically = useCallback(
@@ -393,21 +393,21 @@ const CartPage = () => {
                   }
                 >
                   <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="full" id="full" />
-                    <Label htmlFor="full" className="cursor-pointer flex-1">
-                      Thanh toán hết:
-                      <PriceFormatter
-                        amount={totalPrice}
-                        className="font-semibold"
-                      />
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
                     <RadioGroupItem value="deposit" id="deposit" />
                     <Label htmlFor="deposit" className="cursor-pointer flex-1">
                       Cọc trước:
                       <PriceFormatter
                         amount={totalDepositAmount}
+                        className="font-semibold"
+                      />
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="full" id="full" />
+                    <Label htmlFor="full" className="cursor-pointer flex-1">
+                      Thanh toán hết:
+                      <PriceFormatter
+                        amount={totalPrice}
                         className="font-semibold"
                       />
                     </Label>
