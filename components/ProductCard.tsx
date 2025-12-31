@@ -157,10 +157,9 @@ const ProductCard = ({ product }: { product: Product }) => {
             </p>
           </div>
           {/* Tem số người đã mua */}
-          {(product as any)?.soldOut && (product as any).soldOut > 0 && (
+          {product?.soldOut && product.soldOut > 0 && (
             <span className="text-sm font-bold text-center text-green-600 px-1 rounded-full ">
-              Đã bán:{" "}
-              {((product as any).soldOut as number).toLocaleString("vi-VN")}
+              Đã bán: {(product.soldOut as number).toLocaleString("vi-VN")}
             </span>
           )}
         </div>
