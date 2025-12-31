@@ -72,6 +72,14 @@ export const productType = defineType({
       type: "number",
       validation: (Rule) => Rule.min(0),
     }),
+    defineField({
+      name: "soldOut",
+      title: "Đã bán",
+      type: "number",
+      description: "Số lượng sản phẩm đã bán",
+      initialValue: 0,
+      validation: (Rule) => Rule.min(0),
+    }),
 
     defineField({
       name: "status",

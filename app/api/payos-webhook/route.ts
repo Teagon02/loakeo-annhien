@@ -154,8 +154,8 @@ export async function POST(req: NextRequest) {
 
             if (productRef && quantity > 0) {
               try {
-                // Lấy thông tin sản phẩm hiện tại để có stock hiện tại
-                const productQuery = `*[_id == $productId][0]{_id, name, stock}`;
+                // Lấy thông tin sản phẩm hiện tại để có stock và soldOut hiện tại
+                const productQuery = `*[_id == $productId][0]{_id, name, stock, soldOut}`;
                 const product = await serverWriteClient.fetch(productQuery, {
                   productId: productRef,
                 });
@@ -163,10 +163,17 @@ export async function POST(req: NextRequest) {
                 if (product) {
                   const currentStock = product.stock || 0;
                   const newStock = Math.max(0, currentStock - quantity); // Đảm bảo không âm
+                  const currentSoldOut = product.soldOut || 0;
+                  const newSoldOut = currentSoldOut + quantity; // Tăng số đã bán
 
+                  // Cập nhật stock và soldOut
+                  // Lưu ý: Sanity patch operations là atomic trong một commit
                   await serverWriteClient
                     .patch(productRef)
-                    .set({ stock: newStock })
+                    .set({
+                      stock: newStock,
+                      soldOut: newSoldOut,
+                    })
                     .commit();
 
                   // Gửi cảnh báo nếu tồn kho xuống dưới 3

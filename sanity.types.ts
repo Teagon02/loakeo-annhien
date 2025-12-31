@@ -301,6 +301,7 @@ export type Product = {
     [internalGroqTypeReferenceTo]?: "category";
   }>;
   stock?: number;
+  soldOut?: number;
   status?: "new" | "hot" | "sale";
   variant?: "loa-keo" | "linh-kien-lap-rap" | "phu-kien";
 };
@@ -518,6 +519,7 @@ export type DEAL_PRODUCTS_QUERY_RESULT = Array<{
   discount?: number;
   categories: Array<string | null> | null;
   stock?: number;
+  soldOut?: number;
   status?: "hot" | "new" | "sale";
   variant?: "linh-kien-lap-rap" | "loa-keo" | "phu-kien";
 }>;
@@ -554,6 +556,7 @@ export type PAGINATED_DEAL_PRODUCTS_QUERY_RESULT = {
     discount?: number;
     categories: Array<string | null> | null;
     stock?: number;
+    soldOut?: number;
     status?: "hot" | "new" | "sale";
     variant?: "linh-kien-lap-rap" | "loa-keo" | "phu-kien";
   }>;
@@ -597,6 +600,7 @@ export type PRODUCT_BY_SLUG_QUERY_RESULT = {
     [internalGroqTypeReferenceTo]?: "category";
   }>;
   stock?: number;
+  soldOut?: number;
   status?: "hot" | "new" | "sale";
   variant?: "linh-kien-lap-rap" | "loa-keo" | "phu-kien";
 } | null;
@@ -663,6 +667,7 @@ export type MY_ORDERS_QUERY_RESULT = Array<{
         [internalGroqTypeReferenceTo]?: "category";
       }>;
       stock?: number;
+      soldOut?: number;
       status?: "hot" | "new" | "sale";
       variant?: "linh-kien-lap-rap" | "loa-keo" | "phu-kien";
     } | null;

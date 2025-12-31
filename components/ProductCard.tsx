@@ -113,26 +113,8 @@ const ProductCard = ({ product }: { product: Product }) => {
               />
             ))}
           </div>
-          {/* <p className="text-shop_light_text text-xs tracking-wide">
-            5 đánh giá
-          </p> */}
         </div>
-        {/* Tồn kho & giảm giá */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex items-center gap-2.5">
-            <p className="font-medium">Kho:</p>
-            <p
-              className={` ${product?.stock === 0 ? "text-red-600" : "text-shop_light_green font-semibold"}`}
-            >
-              {(product?.stock as number) > 0 ? product?.stock : "Hết hàng"}
-            </p>
-          </div>
-          {product?.discount ? (
-            <span className="text-xs font-semibold text-shop_orange border border-shop_orange/60 px-2 py-0.5 rounded-full shrink-0">
-              Giảm -{product.discount}%
-            </span>
-          ) : null}
-        </div>
+
         <PriceView
           price={product?.price as number}
           discount={product?.discount as number}
@@ -164,6 +146,24 @@ const ProductCard = ({ product }: { product: Product }) => {
             </SignInButton>
           </div>
         )}
+        {/* Tồn kho & giảm giá */}
+        <div className="flex flex-wrap items-center justify-between">
+          <div className="flex items-center  gap-1">
+            <p className="font-bold text-sm">Kho:</p>
+            <p
+              className={` ${product?.stock === 0 ? "text-red-600" : "text-shop_light_green font-bold text-sm"}`}
+            >
+              {(product?.stock as number) > 0 ? product?.stock : "Hết hàng"}
+            </p>
+          </div>
+          {/* Tem số người đã mua */}
+          {(product as any)?.soldOut && (product as any).soldOut > 0 && (
+            <span className="text-sm font-bold text-center text-green-600 px-1 rounded-full ">
+              Đã bán:{" "}
+              {((product as any).soldOut as number).toLocaleString("vi-VN")}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );

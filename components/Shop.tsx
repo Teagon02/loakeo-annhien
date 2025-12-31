@@ -130,7 +130,7 @@ const Shop = ({ categories }: Props) => {
           minPrice,
           searchPattern,
         },
-        { next: { revalidate: 60 } }
+        { next: { revalidate: 10 } }
       );
 
       setTotalCount(total);
@@ -171,7 +171,8 @@ const Shop = ({ categories }: Props) => {
     && (!defined($searchPattern) || name match $searchPattern)
     && price <= ${maxPrice}
   ] | order(name asc) [${offset}...${offset + limit}] {
-    ...,"categories":categories[]->title
+    ...,
+    "categories":categories[]->title
   }
 `;
 
@@ -182,7 +183,7 @@ const Shop = ({ categories }: Props) => {
           minPrice,
           searchPattern,
         },
-        { next: { revalidate: 60 } }
+        { next: { revalidate: 10 } }
       );
 
       setProducts(data);
