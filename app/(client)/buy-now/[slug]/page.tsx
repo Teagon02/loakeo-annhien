@@ -30,7 +30,7 @@ const BuyNowPage = () => {
   const [selectedAddress, setSelectedAddress] =
     useState<Partial<Address> | null>(null);
   const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [paymentType, setPaymentType] = useState<"full" | "deposit">("full");
+  const [paymentType, setPaymentType] = useState<"full" | "deposit">("deposit");
 
   useEffect(() => {
     const fetchProduct = async () => {
