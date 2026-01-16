@@ -4,12 +4,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Loa Kéo An Nhiên",
-  description: "Loa Kéo An Nhiên",
-  icons: {
-    icon: "/icon.png",
-    shortcut: "/icon.png",
-    apple: "/icon.png",
-  },
+  description: "Ráp và độ chế loa kéo",
 };
 
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
