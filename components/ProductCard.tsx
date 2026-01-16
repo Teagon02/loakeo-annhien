@@ -15,6 +15,7 @@ import { SignInButton } from "@clerk/nextjs";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { toast } from "react-hot-toast";
 
 const ProductCard = ({ product }: { product: Product }) => {
   const { isSignedIn } = useAuth();
@@ -23,6 +24,7 @@ const ProductCard = ({ product }: { product: Product }) => {
 
   const handleBuyNow = () => {
     if (isOutOfStock) {
+      toast.error(`${product?.name?.substring(0, 15)}... đã hết hàng`);
       return;
     }
     if (product?.slug?.current) {
@@ -31,24 +33,42 @@ const ProductCard = ({ product }: { product: Product }) => {
   };
 
   return (
-    <div className="text-sm border border-dark_blue/20 rounded-md bg-white group">
+    <div
+      className={cn(
+        "text-sm border border-dark_blue/20 rounded-md bg-white group transition-opacity",
+        isOutOfStock && "opacity-60"
+      )}
+    >
       <div className="relative group overflow-hidden bg-shop_light_bg p-2">
         {product?.images && (
           <Link href={`/product/${product?.slug?.current}`}>
-            <Image
-              src={urlFor(product?.images[0])
-                .width(1400)
-                .quality(85)
-                .format("webp")
-                .url()}
-              alt="Ảnh sản phẩm"
-              priority
-              width={700}
-              height={700}
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              unoptimized
-              className={`w-full h-64 object-contain overflow-hidden transition-transform bg-shop_light_bg hoverEffect  ${product?.stock !== 0 ? "group-hover:scale-105" : "group-hover:scale-105"}`}
-            />
+            <div className="relative">
+              <Image
+                src={urlFor(product?.images[0])
+                  .width(1400)
+                  .quality(85)
+                  .format("webp")
+                  .url()}
+                alt="Ảnh sản phẩm"
+                priority
+                width={700}
+                height={700}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                unoptimized
+                className={cn(
+                  "w-full h-64 object-contain overflow-hidden transition-transform bg-shop_light_bg hoverEffect",
+                  !isOutOfStock && "group-hover:scale-105",
+                  isOutOfStock && "opacity-70"
+                )}
+              />
+              {isOutOfStock && (
+                <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                  <span className="bg-red-600 text-white px-4 py-2 rounded-md font-bold text-sm shadow-lg">
+                    Hết hàng
+                  </span>
+                </div>
+              )}
+            </div>
           </Link>
         )}
         <AddToWishList product={product} />
@@ -129,8 +149,10 @@ const ProductCard = ({ product }: { product: Product }) => {
               onClick={handleBuyNow}
               disabled={isOutOfStock}
               className={cn(
-                "flex-1 bg-shop_btn_dark_green/70 text-shop_light_bg shadow-none border border-shop_dark_green/80 font-semibold tracking-wide hover:text-white hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect rounded-full",
-                isOutOfStock && "opacity-50 cursor-not-allowed"
+                "flex-1 font-semibold tracking-wide rounded-full transition-all",
+                isOutOfStock
+                  ? "bg-gray-400 text-white cursor-not-allowed border-gray-400"
+                  : "bg-shop_btn_dark_green/70 text-shop_light_bg shadow-none border border-shop_dark_green/80 hover:text-white hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect"
               )}
             >
               {isOutOfStock ? "Hết hàng" : "Mua ngay"}
@@ -138,8 +160,15 @@ const ProductCard = ({ product }: { product: Product }) => {
             <SignInButton mode="modal">
               <button
                 disabled={isOutOfStock}
-                className="p-3 rounded-full border border-shop_dark_green/80 bg-shop_btn_dark_green/70 text-shop_light_bg hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                aria-label="Thêm vào giỏ hàng"
+                className={cn(
+                  "p-3 rounded-full border transition-all",
+                  isOutOfStock
+                    ? "bg-gray-400 border-gray-400 text-white cursor-not-allowed opacity-50"
+                    : "border-shop_dark_green/80 bg-shop_btn_dark_green/70 text-shop_light_bg hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect"
+                )}
+                aria-label={
+                  isOutOfStock ? "Sản phẩm hết hàng" : "Thêm vào giỏ hàng"
+                }
               >
                 <ShoppingCart size={15} />
               </button>

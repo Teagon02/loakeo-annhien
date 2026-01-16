@@ -72,7 +72,10 @@ const AddToCartButton = ({ product, className }: Props) => {
           }}
           disabled={isOutOfStock}
           className={cn(
-            "w-full bg-shop_btn_dark_green/80 text-shop_light_bg shadow-none border border-shop_dark_green/80 font-semibold tracking-wide hover:text-white hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect",
+            "w-full font-semibold tracking-wide transition-all",
+            isOutOfStock
+              ? "bg-gray-400 text-white cursor-not-allowed border-gray-400"
+              : "bg-shop_btn_dark_green/80 text-shop_light_bg shadow-none border border-shop_dark_green/80 hover:text-white hover:bg-shop_dark_green hover:border-shop_dark_green hoverEffect",
             className
           )}
         >

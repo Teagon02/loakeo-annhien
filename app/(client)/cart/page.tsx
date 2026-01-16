@@ -160,6 +160,11 @@ const CartPage = () => {
   const totalDepositAmount = getTotalDepositAmount();
   const hasDepositOption = totalDepositAmount > 0;
 
+  // Kiểm tra xem có sản phẩm nào hết hàng không
+  const hasOutOfStockItems = groupedItems.some(
+    (item) => (item.product?.stock as number) === 0
+  );
+
   const handleCheckout = async () => {
     if (!groupedItems?.length) {
       toast.error("Giỏ hàng trống, không thể thanh toán.");
@@ -168,6 +173,21 @@ const CartPage = () => {
 
     if (!selectedAddress) {
       toast.error("Vui lòng chọn địa chỉ giao hàng trước khi thanh toán.");
+      return;
+    }
+
+    // Kiểm tra sản phẩm hết hàng
+    const outOfStockProducts = groupedItems.filter(
+      (item) => (item.product?.stock as number) === 0
+    );
+    if (outOfStockProducts.length > 0) {
+      const productNames = outOfStockProducts
+        .map((item) => item.product?.name)
+        .filter(Boolean)
+        .join(", ");
+      toast.error(
+        `Không thể thanh toán. Có sản phẩm đã hết hàng: ${productNames}`
+      );
       return;
     }
 
@@ -445,17 +465,26 @@ const CartPage = () => {
               className="text-lg font-semibold text-green-600"
             />
           </div>
+          {hasOutOfStockItems && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-3 mb-3">
+              <p className="text-sm text-red-600 font-semibold">
+                ⚠️ Có sản phẩm đã hết hàng trong giỏ. Vui lòng xóa sản phẩm hết hàng trước khi thanh toán.
+              </p>
+            </div>
+          )}
           <Button
             className="w-full rounded-full font-semibold -tracking-wide hoverEffect"
             size="lg"
-            disabled={loading || !selectedAddress}
+            disabled={loading || !selectedAddress || hasOutOfStockItems}
             onClick={handleCheckout}
           >
             {loading
               ? "Đang xử lý..."
-              : paymentType === "deposit"
-                ? "Thanh toán cọc"
-                : "Thanh toán"}
+              : hasOutOfStockItems
+                ? "Có sản phẩm hết hàng"
+                : paymentType === "deposit"
+                  ? "Thanh toán cọc"
+                  : "Thanh toán"}
           </Button>
         </div>
       </div>
