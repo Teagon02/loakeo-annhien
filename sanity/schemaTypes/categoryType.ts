@@ -28,12 +28,12 @@ export const categoryType = defineType({
       title: "Mô tả",
       type: "text",
     }),
-    defineField({
-      name: "featured",
-      title: "Danh mục nổi bật",
-      type: "boolean",
-      initialValue: false,
-    }),
+    // defineField({
+    //   name: "featured",
+    //   title: "Danh mục nổi bật",
+    //   type: "boolean",
+    //   initialValue: false,
+    // }),
     defineField({
       name: "image",
       title: "Hình ảnh",

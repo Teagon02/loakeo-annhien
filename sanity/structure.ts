@@ -5,10 +5,50 @@ export const structure: StructureResolver = (S) => {
   // Get all document type list items
   const defaultItems = S.documentTypeListItems();
 
-  // Find the order item and replace it with a custom structure
+  // Find product and order items
+  const productItemIndex = defaultItems.findIndex(
+    (item: any) => item.getId() === "product"
+  );
   const orderItemIndex = defaultItems.findIndex(
     (item: any) => item.getId() === "order"
   );
+
+  // Create custom product structure with categories
+  const productStructure = S.listItem()
+    .title("Sản phẩm")
+    .id("product")
+    .child(
+      S.list()
+        .title("Sản phẩm")
+        .items([
+          // Tất cả sản phẩm
+          S.listItem()
+            .title("📋 Tất cả sản phẩm")
+            .id("product-all")
+            .child(
+              S.documentList()
+                .title("Tất cả sản phẩm")
+                .filter('_type == "product"')
+                .defaultOrdering([{ field: "_createdAt", direction: "desc" }])
+            ),
+          S.divider(),
+          // Theo danh mục
+          S.listItem()
+            .title("🏷️ Theo danh mục")
+            .id("product-by-category")
+            .child(
+              S.documentTypeList("category")
+                .title("Chọn danh mục")
+                .child((categoryId) =>
+                  S.documentList()
+                    .title("Sản phẩm trong danh mục")
+                    .filter('_type == "product" && references($categoryId)')
+                    .params({ categoryId })
+                    .defaultOrdering([{ field: "name", direction: "asc" }])
+                )
+            ),
+        ])
+    );
 
   // Create custom order structure with tabs
   const orderStructure = S.listItem()
@@ -67,13 +107,34 @@ export const structure: StructureResolver = (S) => {
         ])
     );
 
-  // Replace the order item with the custom structure
+  // Replace product and order items with custom structures
+  if (productItemIndex !== -1) {
+    defaultItems[productItemIndex] = productStructure;
+  } else {
+    defaultItems.unshift(productStructure);
+  }
+
   if (orderItemIndex !== -1) {
     defaultItems[orderItemIndex] = orderStructure;
   } else {
-    // If order type doesn't exist in default items, add it at the beginning
     defaultItems.unshift(orderStructure);
   }
 
-  return S.list().title("Quản lý đơn hàng").items(defaultItems);
+  // Reorder items: Products and Orders first, then others
+  const reorderedItems = [];
+
+  // Add Products and Orders first
+  reorderedItems.push(productStructure);
+  reorderedItems.push(orderStructure);
+  reorderedItems.push(S.divider());
+
+  // Add remaining items (excluding products and orders)
+  defaultItems.forEach((item: any) => {
+    const itemId = item.getId();
+    if (itemId !== "product" && itemId !== "order") {
+      reorderedItems.push(item);
+    }
+  });
+
+  return S.list().title("Quản lý cửa hàng").items(reorderedItems);
 };
