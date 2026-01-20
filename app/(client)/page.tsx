@@ -11,7 +11,7 @@ import LatestBlog from "@/components/LatestBlog";
 export const revalidate = 600;
 
 const Home = async () => {
-  const categories = await getCategories(12);
+  const categories = await getCategories();
   console.log(categories);
   return (
     <Container className="bg-shop-light-pink">
