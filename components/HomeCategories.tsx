@@ -22,7 +22,7 @@ const HomeCategories = ({
     "loa-xach-tay",
     "bass",
     "micro",
-    "vo-loa",
+    "amply-mixer",
   ];
 
   const normalize = (value?: string | null) =>
@@ -67,7 +67,11 @@ const HomeCategories = ({
                   }}
                 >
                   <Image
-                    src={urlFor(category?.image).width(1000).quality(85).format('webp').url()}
+                    src={urlFor(category?.image)
+                      .width(1000)
+                      .quality(85)
+                      .format("webp")
+                      .url()}
                     alt="Ảnh danh mục"
                     width={500}
                     height={500}
