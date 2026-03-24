@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import logo from "@/images/logo/logo.png";
+import logo from "@/images/logo/logo-main.png";
 import { cn } from "@/lib/utils";
 
 const Logo = ({
